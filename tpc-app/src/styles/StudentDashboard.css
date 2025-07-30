@@ -124,8 +124,8 @@
 
 /* Announcements Card */
 .announcement-card {
-    width: 400px;
-    height: 400px;
+    /* width: 400px; */
+    /* height: 400px; */
     background: linear-gradient(180deg, #001F3F, #003049);
     color: white;
     border-radius: 15px;
@@ -197,7 +197,7 @@
 
 /* Profile Card */
 .profile-card {
-    width: 400px;
+    /* width: 400px; */
     background: linear-gradient(180deg, #001F3F, #003049);
     color: white;
     padding: 20px;
@@ -268,8 +268,6 @@
 
 @media (max-width: 768px) {
     .sidebar {
-        width: 100%;
-        height: auto;
         position: relative;
     }
 

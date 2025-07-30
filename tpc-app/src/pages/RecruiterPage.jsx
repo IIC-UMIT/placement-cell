@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/database';
 import '../styles/RecruiterPage.css';
@@ -77,12 +77,98 @@ function RecruiterPage() {
 
     const [isInternshipEnabled, setIsInternshipEnabled] = useState(false);
 
+    // Add refs for required fields
+    const requiredRefs = {
+        company_name: useRef(null),
+        industry_sector: useRef(null),
+        company_overview: useRef(null),
+        website: useRef(null),
+        companyContact: useRef(null),
+        'placement.job_title': useRef(null),
+        'placement.job_desc': useRef(null),
+        'placement.type_of_employment': useRef(null),
+        'placement.noOfExpectedHires': useRef(null),
+        'placement.jobLocation': useRef(null),
+        'placement.remote_on_site': useRef(null),
+        'placement.eligibility_criteria.required_qualifications': useRef(null),
+        'placement.eligibility_criteria.skill_requirements': useRef(null),
+        'placement.eligibility_criteria.batch_year_of_study': useRef(null),
+        'placement.eligibility_criteria.minimum_cgpa_grade': useRef(null),
+        'placement.ctcAndBreakup.salary': useRef(null),
+        'placement.selection_process.assessment_details': useRef(null),
+        'placement.selection_process.expected_timeline': useRef(null),
+        // Internship fields (conditionally required)
+        'internship.internship_title': useRef(null),
+        'internship.internship_description': useRef(null),
+        'internship.duration.start_date': useRef(null),
+        'internship.duration.end_date': useRef(null),
+        'internship.type_of_employment': useRef(null),
+        'internship.remote_on_site': useRef(null),
+        'internship.eligibility_criteria.required_qualifications': useRef(null),
+        'internship.eligibility_criteria.skill_requirements': useRef(null),
+        'internship.eligibility_criteria.batch_year_of_study': useRef(null),
+        'internship.eligibility_criteria.minimum_cgpa_grade': useRef(null),
+        'internship.ctcAndBreakup.stipend': useRef(null),
+    };
+
+    const [missingFields, setMissingFields] = useState({});
+
+    // Helper to get value by path
+    const getValueByPath = (obj, path) => {
+        return path.split('.').reduce((acc, part) => acc && acc[part], obj);
+    };
+
+    // List of required fields
+    const requiredFields = [
+        { name: 'company_name', section: 'companyDetails' },
+        { name: 'industry_sector', section: 'companyDetails' },
+        { name: 'company_overview', section: 'companyDetails' },
+        { name: 'website', section: 'companyDetails' },
+        { name: 'companyContact', section: 'companyDetails' },
+        { name: 'placement.job_title', section: 'formData' },
+        { name: 'placement.job_desc', section: 'formData' },
+        { name: 'placement.type_of_employment', section: 'formData' },
+        { name: 'placement.noOfExpectedHires', section: 'formData' },
+        { name: 'placement.jobLocation', section: 'formData' },
+        { name: 'placement.remote_on_site', section: 'formData' },
+        { name: 'placement.eligibility_criteria.required_qualifications', section: 'formData' },
+        { name: 'placement.eligibility_criteria.skill_requirements', section: 'formData' },
+        { name: 'placement.eligibility_criteria.batch_year_of_study', section: 'formData' },
+        { name: 'placement.eligibility_criteria.minimum_cgpa_grade', section: 'formData' },
+        { name: 'placement.ctcAndBreakup.salary', section: 'formData' },
+        { name: 'placement.selection_process.assessment_details', section: 'formData' },
+        { name: 'placement.selection_process.expected_timeline', section: 'formData' },
+    ];
+
+    // Internship required fields
+    const internshipRequiredFields = [
+        { name: 'internship.internship_title', section: 'formData' },
+        { name: 'internship.internship_description', section: 'formData' },
+        { name: 'internship.duration.start_date', section: 'formData' },
+        { name: 'internship.duration.end_date', section: 'formData' },
+        { name: 'internship.type_of_employment', section: 'formData' },
+        { name: 'internship.remote_on_site', section: 'formData' },
+        { name: 'internship.eligibility_criteria.required_qualifications', section: 'formData' },
+        { name: 'internship.eligibility_criteria.skill_requirements', section: 'formData' },
+        { name: 'internship.eligibility_criteria.batch_year_of_study', section: 'formData' },
+        { name: 'internship.eligibility_criteria.minimum_cgpa_grade', section: 'formData' },
+        { name: 'internship.ctcAndBreakup.stipend', section: 'formData' },
+    ];
+
     const handleCompanyChange = (e) => {
         const { name, value } = e.target;
         setCompanyDetails((prevDetails) => ({
             ...prevDetails,
             [name]: value,
         }));
+        // Remove error message for this field if filled
+        if (value && value.trim() !== '') {
+            setMissingFields((prev) => {
+                const updated = { ...prev };
+                delete updated[name];
+                return updated;
+            });
+        }
     };
 
     const handleFormChange = (e) => {
@@ -91,10 +177,58 @@ function RecruiterPage() {
             ...prevData,
             [name]: value,
         }));
+        // Remove error message for this field if filled
+        if (value && value.trim() !== '') {
+            setMissingFields((prev) => {
+                const updated = { ...prev };
+                delete updated[name];
+                return updated;
+            });
+        }
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // Validate required fields
+        let missing = {};
+        let firstMissingRef = null;
+
+        // Check company and placement fields
+        for (const field of requiredFields) {
+            let value;
+            if (field.section === 'companyDetails') {
+                value = companyDetails[field.name];
+            } else {
+                value = getValueByPath(formData, field.name);
+            }
+            if (!value || (typeof value === 'string' && value.trim() === '')) {
+                missing[field.name] = true;
+                if (!firstMissingRef) firstMissingRef = requiredRefs[field.name];
+            }
+        }
+
+        // Check internship fields if enabled
+        if (isInternshipEnabled) {
+            for (const field of internshipRequiredFields) {
+                let value = getValueByPath(formData, field.name);
+                if (!value || (typeof value === 'string' && value.trim() === '')) {
+                    missing[field.name] = true;
+                    if (!firstMissingRef) firstMissingRef = requiredRefs[field.name];
+                }
+            }
+        }
+
+        setMissingFields(missing);
+
+        if (Object.keys(missing).length > 0) {
+            // Scroll to first missing field
+            if (firstMissingRef && firstMissingRef.current) {
+                firstMissingRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                firstMissingRef.current.focus();
+            }
+            return;
+        }
 
         try {
             // Save company details first
@@ -114,63 +248,109 @@ function RecruiterPage() {
 
     return (
         <div>
+            <style>
+                {`
+                .required-asterisk { color: red; margin-left: 2px; }
+                .required-message { color: red; font-size: 0.95em; margin-top: 2px; }
+                input, textarea, select {
+                    color: #222 !important;
+                    background: #fff !important;
+                    font-size: 1rem !important;
+                    caret-color: #222 !important;
+                }
+                input::placeholder, textarea::placeholder {
+                    color: #888 !important;
+                    opacity: 1;
+                }
+                `}
+            </style>
             <div className="recruiter-container">
                 <div className="section">
                     <h2>Company Details</h2>
                     <form onSubmit={handleSubmit}>
                         <div className="form-group">
-                            <label htmlFor="company_name">Company Name *</label>
+                            <label htmlFor="company_name">
+                                Company Name
+                                <span className="required-asterisk">*</span>
+                            </label>
                             <input
                                 type="text"
                                 name="company_name"
+                                ref={requiredRefs.company_name}
                                 value={companyDetails.company_name}
                                 onChange={handleCompanyChange}
                                 placeholder="Enter company name"
-                                required
                             />
+                            {missingFields.company_name && (
+                                <div className="required-message">This is a required field</div>
+                            )}
                         </div>
                         <div className="form-group">
-                            <label htmlFor="industry_sector">Industry Sector *</label>
+                            <label htmlFor="industry_sector">
+                                Industry Sector
+                                <span className="required-asterisk">*</span>
+                            </label>
                             <input
                                 type="text"
                                 name="industry_sector"
+                                ref={requiredRefs.industry_sector}
                                 value={companyDetails.industry_sector}
                                 onChange={handleCompanyChange}
                                 placeholder="Enter industry sector"
-                                required
                             />
+                            {missingFields.industry_sector && (
+                                <div className="required-message">This is a required field</div>
+                            )}
                         </div>
                         <div className="form-group">
-                            <label htmlFor="company_overview">Company Overview *</label>
+                            <label htmlFor="company_overview">
+                                Company Overview
+                                <span className="required-asterisk">*</span>
+                            </label>
                             <textarea
                                 name="company_overview"
+                                ref={requiredRefs.company_overview}
                                 value={companyDetails.company_overview}
                                 onChange={handleCompanyChange}
                                 placeholder="Provide a brief overview of the company"
-                                required
                             />
+                            {missingFields.company_overview && (
+                                <div className="required-message">This is a required field</div>
+                            )}
                         </div>
                         <div className="form-group">
-                            <label htmlFor="website">Website *</label>
+                            <label htmlFor="website">
+                                Website
+                                <span className="required-asterisk">*</span>
+                            </label>
                             <input
                                 type="url"
                                 name="website"
+                                ref={requiredRefs.website}
                                 value={companyDetails.website}
                                 onChange={handleCompanyChange}
                                 placeholder="Enter the company website URL"
-                                required
                             />
+                            {missingFields.website && (
+                                <div className="required-message">This is a required field</div>
+                            )}
                         </div>
                         <div className="form-group">
-                            <label htmlFor="companyContact">Company Contact *</label>
+                            <label htmlFor="companyContact">
+                                Company Contact
+                                <span className="required-asterisk">*</span>
+                            </label>
                             <input
                                 type="tel"
                                 name="companyContact"
+                                ref={requiredRefs.companyContact}
                                 value={companyDetails.companyContact}
                                 onChange={handleCompanyChange}
                                 placeholder="Enter company contact number"
-                                required
                             />
+                            {missingFields.companyContact && (
+                                <div className="required-message">This is a required field</div>
+                            )}
                         </div>
                         <div className="form-group">
                             <label htmlFor="alternateContact">Alternate Contact</label>
@@ -185,119 +365,181 @@ function RecruiterPage() {
 
                         <h3>Placement Details</h3>
                         <div className="form-group">
-                            <label htmlFor="placement.job_title">Job Title *</label>
+                            <label htmlFor="placement.job_title">
+                                Job Title
+                                <span className="required-asterisk">*</span>
+                            </label>
                             <input
                                 type="text"
                                 name="placement.job_title"
+                                ref={requiredRefs['placement.job_title']}
                                 value={formData.placement.job_title}
                                 onChange={handleFormChange}
                                 placeholder="Enter job title"
-                                required
                             />
+                            {missingFields['placement.job_title'] && (
+                                <div className="required-message">This is a required field</div>
+                            )}
                         </div>
                         <div className="form-group">
-                            <label htmlFor="placement.job_desc">Job Description *</label>
+                            <label htmlFor="placement.job_desc">
+                                Job Description
+                                <span className="required-asterisk">*</span>
+                            </label>
                             <input
                                 type="text"
                                 name="placement.job_desc"
+                                ref={requiredRefs['placement.job_desc']}
                                 value={formData.placement.job_desc}
                                 onChange={handleFormChange}
                                 placeholder="Describe the job responsibilities"
-                                required
                             />
+                            {missingFields['placement.job_desc'] && (
+                                <div className="required-message">This is a required field</div>
+                            )}
                         </div>
                         <div className="form-group">
-                            <label htmlFor="placement.type_of_employment">Type of Employment *</label>
+                            <label htmlFor="placement.type_of_employment">
+                                Type of Employment
+                                <span className="required-asterisk">*</span>
+                            </label>
                             <input
                                 type="text"
                                 name="placement.type_of_employment"
+                                ref={requiredRefs['placement.type_of_employment']}
                                 value={formData.placement.type_of_employment}
                                 onChange={handleFormChange}
                                 placeholder="Enter type of employment"
-                                required
                             />
+                            {missingFields['placement.type_of_employment'] && (
+                                <div className="required-message">This is a required field</div>
+                            )}
                         </div>
                         <div className="form-group">
-                            <label htmlFor="placement.noOfExpectedHires">No. of Expected Hires *</label>
+                            <label htmlFor="placement.noOfExpectedHires">
+                                No. of Expected Hires
+                                <span className="required-asterisk">*</span>
+                            </label>
                             <input
                                 type="number"
                                 name="placement.noOfExpectedHires"
+                                ref={requiredRefs['placement.noOfExpectedHires']}
                                 value={formData.placement.noOfExpectedHires}
                                 onChange={handleFormChange}
                                 placeholder="Enter expected number of hires"
-                                required
                             />
+                            {missingFields['placement.noOfExpectedHires'] && (
+                                <div className="required-message">This is a required field</div>
+                            )}
                         </div>
                         <div className="form-group">
-                            <label htmlFor="placement.jobLocation">Job Location *</label>
+                            <label htmlFor="placement.jobLocation">
+                                Job Location
+                                <span className="required-asterisk">*</span>
+                            </label>
                             <input
                                 type="text"
                                 name="placement.jobLocation"
+                                ref={requiredRefs['placement.jobLocation']}
                                 value={formData.placement.jobLocation}
                                 onChange={handleFormChange}
                                 placeholder="Enter job location"
-                                required
                             />
+                            {missingFields['placement.jobLocation'] && (
+                                <div className="required-message">This is a required field</div>
+                            )}
                         </div>
                         <div className="form-group">
-                            <label htmlFor="placement.remote_on_site">Remote/On-site/Hybrid *</label>
+                            <label htmlFor="placement.remote_on_site">
+                                Remote/On-site/Hybrid
+                                <span className="required-asterisk">*</span>
+                            </label>
                             <input
                                 type="text"
                                 name="placement.remote_on_site"
+                                ref={requiredRefs['placement.remote_on_site']}
                                 value={formData.placement.remote_on_site}
                                 onChange={handleFormChange}
                                 placeholder="Enter work model"
-                                required
                             />
+                            {missingFields['placement.remote_on_site'] && (
+                                <div className="required-message">This is a required field</div>
+                            )}
                         </div>
 
                         <h3>Eligibility Criteria for Placement</h3>
                         <div className="form-group">
-                            <label htmlFor="placement.eligibility_criteria.required_qualifications">Required Qualifications *</label>
+                            <label htmlFor="placement.eligibility_criteria.required_qualifications">
+                                Required Qualifications
+                                <span className="required-asterisk">*</span>
+                            </label>
                             <input
                                 type="text"
                                 name="placement.eligibility_criteria.required_qualifications"
+                                ref={requiredRefs['placement.eligibility_criteria.required_qualifications']}
                                 value={formData.placement.eligibility_criteria.required_qualifications}
                                 onChange={handleFormChange}
                                 placeholder="Enter required qualifications"
-                                required
                             />
+                            {missingFields['placement.eligibility_criteria.required_qualifications'] && (
+                                <div className="required-message">This is a required field</div>
+                            )}
                         </div>
                         <div className="form-group">
-                            <label htmlFor="placement.eligibility_criteria.skill_requirements">Skill Requirements *</label>
+                            <label htmlFor="placement.eligibility_criteria.skill_requirements">
+                                Skill Requirements
+                                <span className="required-asterisk">*</span>
+                            </label>
                             <input
                                 type="text"
                                 name="placement.eligibility_criteria.skill_requirements"
+                                ref={requiredRefs['placement.eligibility_criteria.skill_requirements']}
                                 value={formData.placement.eligibility_criteria.skill_requirements}
                                 onChange={handleFormChange}
                                 placeholder="Enter skill requirements"
-                                required
                             />
+                            {missingFields['placement.eligibility_criteria.skill_requirements'] && (
+                                <div className="required-message">This is a required field</div>
+                            )}
                         </div>
                         <div className="form-group">
-                            <label htmlFor="placement.eligibility_criteria.batch_year_of_study">Batch Year of Study *</label>
+                            <label htmlFor="placement.eligibility_criteria.batch_year_of_study">
+                                Batch Year of Study
+                                <span className="required-asterisk">*</span>
+                            </label>
                             <input
                                 type="text"
                                 name="placement.eligibility_criteria.batch_year_of_study"
+                                ref={requiredRefs['placement.eligibility_criteria.batch_year_of_study']}
                                 value={formData.placement.eligibility_criteria.batch_year_of_study}
                                 onChange={handleFormChange}
                                 placeholder="Enter eligible batch year(s)"
-                                required
                             />
+                            {missingFields['placement.eligibility_criteria.batch_year_of_study'] && (
+                                <div className="required-message">This is a required field</div>
+                            )}
                         </div>
                         <div className="form-group">
-                            <label htmlFor="placement.eligibility_criteria.minimum_cgpa_grade">Minimum CGPA/Grade *</label>
+                            <label htmlFor="placement.eligibility_criteria.minimum_cgpa_grade">
+                                Minimum CGPA/Grade
+                                <span className="required-asterisk">*</span>
+                            </label>
                             <input
                                 type="text"
                                 name="placement.eligibility_criteria.minimum_cgpa_grade"
+                                ref={requiredRefs['placement.eligibility_criteria.minimum_cgpa_grade']}
                                 value={formData.placement.eligibility_criteria.minimum_cgpa_grade}
                                 onChange={handleFormChange}
                                 placeholder="Enter minimum CGPA or grade"
-                                required
                             />
+                            {missingFields['placement.eligibility_criteria.minimum_cgpa_grade'] && (
+                                <div className="required-message">This is a required field</div>
+                            )}
                         </div>
                         <div className="form-group">
-                            <label htmlFor="placement.eligibility_criteria.other_criteria">Other Criteria</label>
+                            <label htmlFor="placement.eligibility_criteria.other_criteria">
+                                Other Criteria
+                            </label>
                             <input
                                 type="text"
                                 name="placement.eligibility_criteria.other_criteria"
@@ -309,18 +551,26 @@ function RecruiterPage() {
 
                         <h3>CTC and Breakup for Placement</h3>
                         <div className="form-group">
-                            <label htmlFor="placement.ctcAndBreakup.salary">Salary *</label>
+                            <label htmlFor="placement.ctcAndBreakup.salary">
+                                Salary
+                                <span className="required-asterisk">*</span>
+                            </label>
                             <input
                                 type="text"
                                 name="placement.ctcAndBreakup.salary"
+                                ref={requiredRefs['placement.ctcAndBreakup.salary']}
                                 value={formData.placement.ctcAndBreakup.salary}
                                 onChange={handleFormChange}
                                 placeholder="Enter expected salary"
-                                required
                             />
+                            {missingFields['placement.ctcAndBreakup.salary'] && (
+                                <div className="required-message">This is a required field</div>
+                            )}
                         </div>
                         <div className="form-group">
-                            <label htmlFor="placement.ctcAndBreakup.bonus">Bonus/Incentives</label>
+                            <label htmlFor="placement.ctcAndBreakup.bonus">
+                                Bonus/Incentives
+                            </label>
                             <input
                                 type="text"
                                 name="placement.ctcAndBreakup.bonus"
@@ -330,7 +580,9 @@ function RecruiterPage() {
                             />
                         </div>
                         <div className="form-group">
-                            <label htmlFor="placement.ctcAndBreakup.additional_benefits">Additional Benefits</label>
+                            <label htmlFor="placement.ctcAndBreakup.additional_benefits">
+                                Additional Benefits
+                            </label>
                             <input
                                 type="text"
                                 name="placement.ctcAndBreakup.additional_benefits"
@@ -342,151 +594,229 @@ function RecruiterPage() {
 
                         <h3>Selection Process for Placement</h3>
                         <div className="form-group">
-                            <label htmlFor="placement.selection_process.assessment_details">Assessment Details *</label>
+                            <label htmlFor="placement.selection_process.assessment_details">
+                                Assessment Details
+                                <span className="required-asterisk">*</span>
+                            </label>
                             <input
                                 type="text"
                                 name="placement.selection_process.assessment_details"
+                                ref={requiredRefs['placement.selection_process.assessment_details']}
                                 value={formData.placement.selection_process.assessment_details}
                                 onChange={handleFormChange}
                                 placeholder="Enter assessment details"
-                                required
                             />
+                            {missingFields['placement.selection_process.assessment_details'] && (
+                                <div className="required-message">This is a required field</div>
+                            )}
                         </div>
                         <div className="form-group">
-                            <label htmlFor="placement.selection_process.expected_timeline">Expected Timeline *</label>
+                            <label htmlFor="placement.selection_process.expected_timeline">
+                                Expected Timeline
+                                <span className="required-asterisk">*</span>
+                            </label>
                             <input
                                 type="text"
                                 name="placement.selection_process.expected_timeline"
+                                ref={requiredRefs['placement.selection_process.expected_timeline']}
                                 value={formData.placement.selection_process.expected_timeline}
                                 onChange={handleFormChange}
                                 placeholder="Enter expected timeline"
-                                required
                             />
+                            {missingFields['placement.selection_process.expected_timeline'] && (
+                                <div className="required-message">This is a required field</div>
+                            )}
                         </div>
 
-                        <div className="form-group">
-                            <label>Include Internship Details?</label>
+                        <div className="form-group" style={{ display: 'flex', gap: '0.5rem' , flexDirection: 'row'}}>
                             <input
                                 type="checkbox"
+                                id="include-internship"
                                 checked={isInternshipEnabled}
                                 onChange={() => setIsInternshipEnabled(!isInternshipEnabled)}
+                                style={{ width: '18px'}}
                             />
+                            <label htmlFor="include-internship" style={{ margin: 0, fontWeight: 600, fontSize: '1.2rem' }}>
+                                Include Internship Details?
+                            </label>
                         </div>
 
                         {isInternshipEnabled && (
                             <>
                                 <h3>Internship Details</h3>
                                 <div className="form-group">
-                                    <label htmlFor="internship.internship_title">Internship Title *</label>
+                                    <label htmlFor="internship.internship_title">
+                                        Internship Title
+                                        <span className="required-asterisk">*</span>
+                                    </label>
                                     <input
                                         type="text"
                                         name="internship.internship_title"
+                                        ref={requiredRefs['internship.internship_title']}
                                         value={formData.internship.internship_title}
                                         onChange={handleFormChange}
                                         placeholder="Enter internship title"
-                                        required
                                     />
+                                    {missingFields['internship.internship_title'] && (
+                                        <div className="required-message">This is a required field</div>
+                                    )}
                                 </div>
                                 <div className="form-group">
-                                    <label htmlFor="internship.internship_description">Internship Description *</label>
+                                    <label htmlFor="internship.internship_description">
+                                        Internship Description
+                                        <span className="required-asterisk">*</span>
+                                    </label>
                                     <textarea
                                         name="internship.internship_description"
+                                        ref={requiredRefs['internship.internship_description']}
                                         value={formData.internship.internship_description}
                                         onChange={handleFormChange}
                                         placeholder="Describe the internship responsibilities"
-                                        required
                                     />
+                                    {missingFields['internship.internship_description'] && (
+                                        <div className="required-message">This is a required field</div>
+                                    )}
                                 </div>
                                 <div className="form-group">
-                                    <label htmlFor="internship.duration.start_date">Internship Start Date *</label>
+                                    <label htmlFor="internship.duration.start_date">
+                                        Internship Start Date
+                                        <span className="required-asterisk">*</span>
+                                    </label>
                                     <input
                                         type="date"
                                         name="internship.duration.start_date"
+                                        ref={requiredRefs['internship.duration.start_date']}
                                         value={formData.internship.duration.start_date}
                                         onChange={handleFormChange}
-                                        required
                                     />
+                                    {missingFields['internship.duration.start_date'] && (
+                                        <div className="required-message">This is a required field</div>
+                                    )}
                                 </div>
                                 <div className="form-group">
-                                    <label htmlFor="internship.duration.end_date">Internship End Date *</label>
+                                    <label htmlFor="internship.duration.end_date">
+                                        Internship End Date
+                                        <span className="required-asterisk">*</span>
+                                    </label>
                                     <input
                                         type="date"
                                         name="internship.duration.end_date"
+                                        ref={requiredRefs['internship.duration.end_date']}
                                         value={formData.internship.duration.end_date}
                                         onChange={handleFormChange}
-                                        required
                                     />
+                                    {missingFields['internship.duration.end_date'] && (
+                                        <div className="required-message">This is a required field</div>
+                                    )}
                                 </div>
                                 <div className="form-group">
-                                    <label htmlFor="internship.type_of_employment">Type of Employment *</label>
+                                    <label htmlFor="internship.type_of_employment">
+                                        Type of Employment
+                                        <span className="required-asterisk">*</span>
+                                    </label>
                                     <input
                                         type="text"
                                         name="internship.type_of_employment"
+                                        ref={requiredRefs['internship.type_of_employment']}
                                         value={formData.internship.type_of_employment}
                                         onChange={handleFormChange}
                                         placeholder="Enter type of employment"
-                                        required
                                     />
+                                    {missingFields['internship.type_of_employment'] && (
+                                        <div className="required-message">This is a required field</div>
+                                    )}
                                 </div>
                                 <div className="form-group">
-                                    <label htmlFor="internship.remote_on_site">Remote/On-site/Hybrid *</label>
+                                    <label htmlFor="internship.remote_on_site">
+                                        Remote/On-site/Hybrid
+                                        <span className="required-asterisk">*</span>
+                                    </label>
                                     <input
                                         type="text"
                                         name="internship.remote_on_site"
+                                        ref={requiredRefs['internship.remote_on_site']}
                                         value={formData.internship.remote_on_site}
                                         onChange={handleFormChange}
                                         placeholder="Enter work model"
-                                        required
                                     />
+                                    {missingFields['internship.remote_on_site'] && (
+                                        <div className="required-message">This is a required field</div>
+                                    )}
                                 </div>
 
                                 <h3>Eligibility Criteria for Internship</h3>
                                 <div className="form-group">
-                                    <label htmlFor="internship.eligibility_criteria.required_qualifications">Required Qualifications *</label>
+                                    <label htmlFor="internship.eligibility_criteria.required_qualifications">
+                                        Required Qualifications
+                                        <span className="required-asterisk">*</span>
+                                    </label>
                                     <input
                                         type="text"
                                         name="internship.eligibility_criteria.required_qualifications"
+                                        ref={requiredRefs['internship.eligibility_criteria.required_qualifications']}
                                         value={formData.internship.eligibility_criteria.required_qualifications}
                                         onChange={handleFormChange}
                                         placeholder="Enter required qualifications"
-                                        required
                                     />
+                                    {missingFields['internship.eligibility_criteria.required_qualifications'] && (
+                                        <div className="required-message">This is a required field</div>
+                                    )}
                                 </div>
                                 <div className="form-group">
-                                    <label htmlFor="internship.eligibility_criteria.skill_requirements">Skill Requirements *</label>
+                                    <label htmlFor="internship.eligibility_criteria.skill_requirements">
+                                        Skill Requirements
+                                        <span className="required-asterisk">*</span>
+                                    </label>
                                     <input
                                         type="text"
                                         name="internship.eligibility_criteria.skill_requirements"
+                                        ref={requiredRefs['internship.eligibility_criteria.skill_requirements']}
                                         value={formData.internship.eligibility_criteria.skill_requirements}
                                         onChange={handleFormChange}
                                         placeholder="Enter skill requirements"
-                                        required
                                     />
+                                    {missingFields['internship.eligibility_criteria.skill_requirements'] && (
+                                        <div className="required-message">This is a required field</div>
+                                    )}
                                 </div>
                                 <div className="form-group">
-                                    <label htmlFor="internship.eligibility_criteria.batch_year_of_study">Batch Year of Study *</label>
+                                    <label htmlFor="internship.eligibility_criteria.batch_year_of_study">
+                                        Batch Year of Study
+                                        <span className="required-asterisk">*</span>
+                                    </label>
                                     <input
                                         type="text"
                                         name="internship.eligibility_criteria.batch_year_of_study"
+                                        ref={requiredRefs['internship.eligibility_criteria.batch_year_of_study']}
                                         value={formData.internship.eligibility_criteria.batch_year_of_study}
                                         onChange={handleFormChange}
                                         placeholder="Enter eligible batch year(s)"
-                                        required
                                     />
+                                    {missingFields['internship.eligibility_criteria.batch_year_of_study'] && (
+                                        <div className="required-message">This is a required field</div>
+                                    )}
                                 </div>
                                 <div className="form-group">
-                                    <label htmlFor="internship.eligibility_criteria.minimum_cgpa_grade">Minimum CGPA/Grade *</label>
+                                    <label htmlFor="internship.eligibility_criteria.minimum_cgpa_grade">
+                                        Minimum CGPA/Grade
+                                        <span className="required-asterisk">*</span>
+                                    </label>
                                     <input
                                         type="text"
                                         name="internship.eligibility_criteria.minimum_cgpa_grade"
+                                        ref={requiredRefs['internship.eligibility_criteria.minimum_cgpa_grade']}
                                         value={formData.internship.eligibility_criteria.minimum_cgpa_grade}
                                         onChange={handleFormChange}
                                         placeholder="Enter minimum CGPA or grade"
-                                        required
                                     />
+                                    {missingFields['internship.eligibility_criteria.minimum_cgpa_grade'] && (
+                                        <div className="required-message">This is a required field</div>
+                                    )}
                                 </div>
                                 <div className="form-group">
-                                    <label htmlFor="internship.eligibility_criteria.other_criteria">Other Criteria</label>
+                                    <label htmlFor="internship.eligibility_criteria.other_criteria">
+                                        Other Criteria
+                                    </label>
                                     <input
                                         type="text"
                                         name="internship.eligibility_criteria.other_criteria"
@@ -498,18 +828,26 @@ function RecruiterPage() {
 
                                 <h3>CTC and Breakup for Internship</h3>
                                 <div className="form-group">
-                                    <label htmlFor="internship.ctcAndBreakup.stipend">Stipend *</label>
+                                    <label htmlFor="internship.ctcAndBreakup.stipend">
+                                        Stipend
+                                        <span className="required-asterisk">*</span>
+                                    </label>
                                     <input
                                         type="text"
                                         name="internship.ctcAndBreakup.stipend"
+                                        ref={requiredRefs['internship.ctcAndBreakup.stipend']}
                                         value={formData.internship.ctcAndBreakup.stipend}
                                         onChange={handleFormChange}
                                         placeholder="Enter stipend amount"
-                                        required
                                     />
+                                    {missingFields['internship.ctcAndBreakup.stipend'] && (
+                                        <div className="required-message">This is a required field</div>
+                                    )}
                                 </div>
                                 <div className="form-group">
-                                    <label htmlFor="internship.ctcAndBreakup.bonus">Bonus/Incentives</label>
+                                    <label htmlFor="internship.ctcAndBreakup.bonus">
+                                        Bonus/Incentives
+                                    </label>
                                     <input
                                         type="text"
                                         name="internship.ctcAndBreakup.bonus"
@@ -519,7 +857,9 @@ function RecruiterPage() {
                                     />
                                 </div>
                                 <div className="form-group">
-                                    <label htmlFor="internship.ctcAndBreakup.additional_benefits">Additional Benefits</label>
+                                    <label htmlFor="internship.ctcAndBreakup.additional_benefits">
+                                        Additional Benefits
+                                    </label>
                                     <input
                                         type="text"
                                         name="internship.ctcAndBreakup.additional_benefits"
@@ -535,7 +875,6 @@ function RecruiterPage() {
                     </form>
                 </div>
             </div>
-
         </div>
     );
 }

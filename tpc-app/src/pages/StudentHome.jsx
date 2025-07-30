@@ -156,7 +156,7 @@ const Dashboard = ({ userData }) => {
 
         <div className="RightBarDashboard">
           {/* Profile Card */}
-          <div className="profile-card my-4">
+          <div className="profile-card">
             <img src="https://via.placeholder.com/80" alt="Profile" />
             <h5>{userData.name}</h5>
             <p>{userData.email}</p>

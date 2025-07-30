@@ -80,7 +80,7 @@ select:focus {
 
 .student-page {
   padding: 20px;
-  max-width: 600px;
+  max-width: 800px;
   margin: 0 auto;
 }
 
@@ -110,6 +110,16 @@ select:focus {
   text-align: center;
 }
 
+.flex-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.flex-row > .form-group {
+  flex: 1 1 0;
+  margin-bottom: 0;
+}
+
 @media (max-width: 600px) {
   .student-page {
     padding: 10px;
@@ -127,6 +137,11 @@ select:focus {
 
   .SGPA .form-group {
     flex-direction: column;
+  }
+
+  .flex-row {
+    flex-direction: column;
+    gap: 0;
   }
 }
 
