@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, Filter, Plus, ChevronDown, Edit, Trash2, Eye, Copy, Calendar, Users, Clock } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Modal } from 'react-bootstrap'; // Add this import for modal functionality
+import "../styles/RecruiterJDManager.css"; // Ensure you have a CSS file for styling
 
 const JobDescriptionManagement = () => {
   const [jobs, setJobs] = useState([]);
@@ -111,9 +112,12 @@ const JobDescriptionManagement = () => {
 
   return (
     <div className="bg-gray-50 min-h-screen">
-      {/* Header */}
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 py-6 flex justify-between items-center">
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 py-6">
+        
+        {/* Filters and Search */}
+        <div className="bg-white p-6 rounded-lg shadow mb-6">
+          <div className="max-w-7xl mx-auto px-4 py-6 flex justify-between items-center">
           <h1 className="text-3xl font-bold text-gray-900">Job Descriptions</h1>
           <Link 
             to="/recruiter/jobs/new" 
@@ -123,13 +127,7 @@ const JobDescriptionManagement = () => {
             <span>Create New JD</span>
           </Link>
         </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 py-6">
-        {/* Filters and Search */}
-        <div className="bg-white p-6 rounded-lg shadow mb-6">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 px-4 md:space-y-0">
             <div className="flex space-x-4">
               <button 
                 className={`px-4 py-2 rounded-md ${filter === 'all' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'}`}
@@ -153,7 +151,7 @@ const JobDescriptionManagement = () => {
             
             <div className="flex space-x-3">
               <div className="relative">
-                <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                {/* <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" /> */}
                 <input
                   type="text"
                   placeholder="Search jobs..."
@@ -174,18 +172,18 @@ const JobDescriptionManagement = () => {
                   <option value="applicants">Most Applicants</option>
                   <option value="deadline">Deadline (Soonest)</option>
                 </select>
-                <ChevronDown size={18} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
+                {/* <ChevronDown size={18} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" /> */}
               </div>
             </div>
           </div>
-        </div>
+        
 
         {/* Job Listings */}
-        <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div>
           {sortedJobs.length > 0 ? (
             <div className="divide-y divide-gray-200">
               {sortedJobs.map(job => (
-                <div key={job.id} className="p-6 hover:bg-gray-50">
+                <div key={job.id} className="hover:bg-gray-50 mb-4 rounded-lg shadow-sm bg-white" style={{ padding: '20px' }}>
                   <div className="flex flex-col md:flex-row md:justify-between md:items-center">
                     <div>
                       <div className="flex items-center">
@@ -260,6 +258,7 @@ const JobDescriptionManagement = () => {
               <p className="text-gray-500">No job descriptions found matching your criteria.</p>
             </div>
           )}
+        </div>
         </div>
       </main>
 

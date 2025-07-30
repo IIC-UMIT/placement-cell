@@ -1,0 +1,437 @@
+
+.bg-gray-50 {
+  background-color: #f9fafb;
+}
+
+.min-h-screen {
+  min-height: 100vh;
+}
+
+/* Header */
+.header-shadow {
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -2px rgba(0,0,0,0.05);
+}
+
+.header-container {
+  max-width: 84rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+h1.text-3xl {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.create-job-btn {
+  padding: 0.5rem 1rem;
+  background: linear-gradient(90deg, #001f3f, #003049);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.create-job-btn span {
+  margin-left: 0.25rem;
+}
+
+.create-job-btn:hover {
+  background: linear-gradient(90deg, #003049, #001f3f);
+}
+
+/* Filters/Search/Sort */
+.filters-bar {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px rgba(16, 28, 44, 0.07);
+  margin-bottom: 1.5rem;
+}
+
+.filter-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  background-color: #f3f4f6;
+  color: #374151;
+  border: none;
+  font-weight: 500;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-right: 0.5rem;
+  transition: background 0.3s;
+}
+.filter-btn:last-child {
+  margin-right: 0;
+}
+
+.filter-btn.active,
+.filter-btn.bg-blue-100,
+.filter-btn.bg-green-100,
+.filter-btn.bg-red-100 {
+  background: linear-gradient(90deg, #001f3f, #003049);
+  color: #fff;
+}
+
+.filter-btn.bg-green-100 {
+  background: #d1fae5;
+  color: #047857;
+}
+.filter-btn.bg-red-100 {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+input[type="text"], select {
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  border: 1px solid #e5e7eb;
+  font-size: 1rem;
+  outline: none;
+}
+
+input[type="text"]:focus, select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px #bfdbfe;
+}
+
+select {
+  background: #f3f4f6;
+}
+
+.flex {
+  display: flex;
+}
+.flex-col {
+  flex-direction: column;
+}
+.md\:flex-row {
+  flex-direction: row;
+}
+.md\:items-center {
+  align-items: center;
+}
+.md\:justify-between {
+  justify-content: space-between;
+}
+.space-x-4 > *:not(:last-child) {
+  margin-right: 1rem;
+}
+
+/* Job Card / List Styles */
+.bg-white {
+  background-color: #fff;
+}
+.rounded-lg {
+  border-radius: 0.5rem;
+}
+.shadow {
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05),0 2px 4px -2px rgb(0 0 0 / 0.05);
+}
+.overflow-hidden {
+  overflow: hidden;
+}
+.divide-y:not(:last-child)::after {
+  content: "";
+  border-bottom: 1px solid #e5e7eb;
+}
+
+/* Single Job Card */
+.job-card {
+  padding: 1.5rem;
+  transition: background 0.2s;
+}
+.job-card:hover {
+  background: #f3f4f6;
+}
+
+.job-title-status {
+  display: flex;
+  align-items: center;
+}
+.job-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+}
+.status-chip-active {
+  margin-left: 0.75rem;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.75rem;
+  border-radius: 999px;
+  background: #d1fae5;
+  color: #047857;
+  font-weight: 500;
+}
+.status-chip-closed {
+  margin-left: 0.75rem;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.75rem;
+  border-radius: 999px;
+  background: #fee2e2;
+  color: #b91c1c;
+  font-weight: 500;
+}
+.mt-2 { margin-top: 0.5rem; }
+.text-sm { font-size: 0.875rem; color: #6b7280; }
+.mr-4 { margin-right: 1rem; }
+
+.badge-applicants {
+  background: #dbeafe;
+  color: #1d4ed8;
+  padding: 0.375rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  margin-right: 1rem;
+}
+
+.action-btn {
+  padding: 0.5rem;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.action-btn.text-blue-600:hover { background: #e0e7ff; }
+.action-btn.text-green-600:hover { background: #d1fae5; }
+.action-btn.text-purple-600:hover { background: #ede9fe; }
+.action-btn.text-red-600:hover { background: #fee2e2; }
+
+.space-x-2 > *:not(:last-child) { margin-right: 0.5rem; }
+
+/* Modal Buttons */
+.btn, .btn-danger, .btn-secondary {
+  font-size: 16px;
+  border-radius: 6px;
+  padding: 12px 24px;
+  font-weight: 500;
+  border: none;
+  margin-left: 1rem;
+  margin-right: 0;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+.btn-danger {
+  background: linear-gradient(90deg, #9B1C1C, #b91c1c);
+  color: white;
+}
+.btn-danger:hover {
+  background: linear-gradient(90deg, #b91c1c, #9B1C1C);
+}
+.btn-secondary {
+  background: #e5e7eb;
+  color: #374151;
+}
+.btn-secondary:hover {
+  background: #d1d5db;
+}
+
+/* Your custom submit button style */
+button[type="submit"] {
+  padding: 15px 0;
+  background: linear-gradient(90deg, #001F3F, #003049);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 20px;
+  transition: background-color 0.3s ease;
+}
+button[type="submit"]:hover {
+  background: linear-gradient(90deg, #001F3F, #003049);
+}
+
+/* Responsive: Optional - adjust as needed for your app */
+@media (max-width: 768px) {
+  .header-container, .filters-bar, main {
+    padding: 1rem;
+  }
+  .flex, .filters-bar {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .job-card {
+    padding: 1rem;
+  }
+}
+
+/* Base button style for all buttons */
+
+/* Primary submit button style */
+button[type="submit"] {
+  padding: 15px 0;
+  background: linear-gradient(90deg, #001F3F, #003049);
+  color: white;
+  width: 100%;
+  margin-top: 20px;
+}
+
+button[type="submit"]:hover {
+  background: linear-gradient(90deg, #001F3F, #003049);
+}
+
+/* Create New JD button style */
+.create-job-btn {
+  background: linear-gradient(90deg, #001F3F, #003049);
+  color: white;
+  padding: 10px 20px;
+  font-size: 16px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  transition: background 0.3s ease;
+}
+
+.create-job-btn:hover {
+  background: linear-gradient(90deg, #003049, #001F3F);
+}
+
+/* Action Buttons (Edit, Delete, View, etc.) */
+.action-btn {
+  padding: 8px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  background: transparent;
+  transition: background 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-btn.text-blue-600:hover {
+  background: #e0e7ff;
+  color: #1e3a8a;
+}
+
+.action-btn.text-green-600:hover {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.action-btn.text-purple-600:hover {
+  background: #ede9fe;
+  color: #6b21a8;
+}
+
+.action-btn.text-red-600:hover {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* Delete confirmation modal buttons */
+.btn {
+  font-size: 16px;
+  border-radius: 6px;
+  padding: 12px 24px;
+  font-weight: 500;
+  border: none;
+  margin-left: 1rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.btn-danger {
+  background: linear-gradient(90deg, #9B1C1C, #b91c1c);
+  color: white;
+}
+
+.btn-danger:hover {
+  background: linear-gradient(90deg, #b91c1c, #9B1C1C);
+}
+
+.btn-secondary {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.btn-secondary:hover {
+  background: #d1d5db;
+}
+
+/* Primary submit button style */
+button[type="submit"] {
+  padding: 15px 0; /* Keep vertical padding as you had */
+  background: linear-gradient(90deg, #001F3F, #003049);
+  color: white;
+  width: 100%;
+  margin-top: 20px;
+}
+
+button[type="submit"]:hover {
+  background: linear-gradient(90deg, #001F3F, #003049);
+}
+
+/* Create New JD button style */
+.create-job-btn {
+  background: linear-gradient(90deg, #001F3F, #003049);
+  color: white;
+  padding: 12px 24px;  /* Added consistent padding */
+  font-size: 16px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  transition: background 0.3s ease;
+}
+
+.create-job-btn:hover {
+  background: linear-gradient(90deg, #003049, #001F3F);
+}
+
+/* Action Buttons (Edit, Delete, View, etc.) */
+.action-btn {
+  padding: 10px; /* Added padding for better clickable area */
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  background: transparent;
+  transition: background 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-btn.text-blue-600:hover {
+  background: #e0e7ff;
+  color: #1e3a8a;
+}
+
+.action-btn.text-green-600:hover {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.action-btn.text-purple-600:hover {
+  background: #ede9fe;
+  color: #6b21a8;
+}
+
+.action-btn.text-red-600:hover {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* Delete confirmation modal buttons */
+.btn, .btn-danger, .btn-secondary {
+  padding: 12px 24px; /* Consistent padding */
+}
+
+/* Feel free to adjust the padding values to your liking */

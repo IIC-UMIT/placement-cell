@@ -51,7 +51,7 @@ const Resources = () => {
             <div className="grid grid-cols-3 gap-6 mt-6">
               {filteredBlogs.slice(0, 3).map((blog) => (
                 <div key={blog.id} className="bg-white p-4 rounded-lg shadow-md">
-                  <img src={blog.image || "/placeholder.jpg"} alt={blog.title} className="rounded-md" />
+                  {/* <img src={blog.image || "/placeholder.jpg"} alt={blog.title} className="rounded-md" /> */}
                   <h3 className="font-bold mt-2">{blog.title}</h3>
                   <p className="text-sm text-gray-600">By {blog.author}</p>
                   <button

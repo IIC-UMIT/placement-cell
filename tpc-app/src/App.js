@@ -75,6 +75,8 @@ const App = () => {
   //   });
   // }, [loggedInUser]);
 
+  console.log(loggedInUser)
+
   useEffect(() => {
     const unsubscribe = firebase.auth().onAuthStateChanged(async (user) => {
       if (user) {

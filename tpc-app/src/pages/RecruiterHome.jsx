@@ -63,13 +63,6 @@ const RecruiterHome = () => {
           </div>
         </div>
 
-        {/* Chart Container */}
-        <div className="chart-container">
-          <h5>Hiring Performance</h5>
-          <p>Recent Recruitment Activity</p>
-          {/* Add chart here using Chart.js or other libraries */}
-        </div>
-
         {/* Active Jobs Section */}
         <div className="jobs-section">
           <div className="section-title">

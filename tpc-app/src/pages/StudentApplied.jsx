@@ -544,3 +544,114 @@ const StudentDetailsPage = () => {
 };
 
 export default StudentDetailsPage;
+
+// import React, { useState, useEffect } from "react";
+// import firebase from "firebase/compat/app";
+// import "firebase/compat/database";
+
+// const StudentDetailsPage = ({ recruiterKey }) => {
+//   const [appliedStudentIds, setAppliedStudentIds] = useState([]);
+//   const [students, setStudents] = useState([]);
+//   const [loading, setLoading] = useState(true);
+
+//   useEffect(() => {
+//     if (!recruiterKey) return;
+
+//     const fetchAppliedStudents = async () => {
+//       try {
+//         // Fetch all applied student IDs for this recruiter
+//         const appliedRef = await firebase
+//           .database()
+//           .ref(`Recruiters/${recruiterKey}/AppliedStudents`)
+//           .once("value");
+
+//         const appliedData = appliedRef.val();
+
+//         if (!appliedData) {
+//           setAppliedStudentIds([]);
+//           setStudents([]);
+//           setLoading(false);
+//           return;
+//         }
+
+//         const ids = Object.keys(appliedData);
+//         setAppliedStudentIds(ids);
+
+//         // Now fetch details for those student IDs from Students node
+//         // Since students are organized by year->branch->id,
+//         // we must search through all years and branches for each student ID
+
+//         const studentRef = await firebase.database().ref("Students").once("value");
+//         const studentData = studentRef.val();
+
+//         let foundStudents = [];
+
+//         ids.forEach((studentId) => {
+//           for (const year in studentData) {
+//             for (const branch in studentData[year]) {
+//               if (studentData[year][branch][studentId]) {
+//                 foundStudents.push({
+//                   id: studentId,
+//                   year,
+//                   branch,
+//                   ...studentData[year][branch][studentId],
+//                 });
+//                 break;
+//               }
+//             }
+//           }
+//         });
+
+//         setStudents(foundStudents);
+//         setLoading(false);
+//       } catch (error) {
+//         console.error("Error fetching applied students:", error);
+//         setLoading(false);
+//       }
+//     };
+
+//     fetchAppliedStudents();
+//   }, [recruiterKey]);
+
+//   if (loading) {
+//     return <div>Loading applied students...</div>;
+//   }
+
+//   if (!students.length) {
+//     return <div>No students have applied yet.</div>;
+//   }
+
+//   return (
+//     <div className="max-w-7xl mx-auto p-4">
+//       <h2 className="text-2xl font-bold mb-4">Applied Students</h2>
+//       <table className="min-w-full border border-gray-300 rounded-md overflow-hidden">
+//         <thead className="bg-gray-100">
+//           <tr>
+//             <th className="border px-4 py-2 text-left">Student ID</th>
+//             <th className="border px-4 py-2 text-left">Name</th>
+//             <th className="border px-4 py-2 text-left">Degree</th>
+//             <th className="border px-4 py-2 text-left">Year</th>
+//             <th className="border px-4 py-2 text-left">Branch</th>
+//             <th className="border px-4 py-2 text-left">Email</th>
+//             <th className="border px-4 py-2 text-left">Phone</th>
+//           </tr>
+//         </thead>
+//         <tbody>
+//           {students.map((student) => (
+//             <tr key={student.id} className="hover:bg-gray-50">
+//               <td className="border px-4 py-2">{student.id}</td>
+//               <td className="border px-4 py-2">{student.name || "N/A"}</td>
+//               <td className="border px-4 py-2">{student.degree || "-"}</td>
+//               <td className="border px-4 py-2">{student.year}</td>
+//               <td className="border px-4 py-2">{student.branch}</td>
+//               <td className="border px-4 py-2">{student.email || "-"}</td>
+//               <td className="border px-4 py-2">{student.phone || "-"}</td>
+//             </tr>
+//           ))}
+//         </tbody>
+//       </table>
+//     </div>
+//   );
+// };
+
+// export default StudentDetailsPage;

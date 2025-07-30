@@ -147,7 +147,6 @@ const StudentDetails = () => {
             <th>GitHub</th>
             <th>Address</th>
             <th>DOB</th>
-            <th>Photograph</th>
           </tr>
         </thead>
         <tbody>
@@ -186,13 +185,6 @@ const StudentDetails = () => {
               </td>
               <td>{student.address || "N/A"}</td>
               <td>{student.dob || "N/A"}</td>
-              <td>
-                {student.photograph ? (
-                  <img src={student.photograph} alt="Student" width="50" />
-                ) : (
-                  "N/A"
-                )}
-              </td>
             </tr>
           ))}
         </tbody>
