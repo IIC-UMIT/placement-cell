@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import database from '../firebaseConfig'; // Ensure Firebase is imported
+import database from '../firebaseConfig';
 import '../styles/TeamPage.css';
 import logo from '../assets/images/IIIC-logo.png';
 
@@ -24,8 +24,13 @@ const ContactUs = () => {
     fetchData();
   }, []);
 
+  const teamArray = Object.entries(data);
+  const head = teamArray.find(([_, member]) => member.name === "Vilas Kharat");
+  const others = teamArray.filter(([_, member]) => member.name !== "Vilas Kharat");
+
   return (
     <div className='teamContainer container-fluid'>
+      {/* Navigation */}
       <nav className="nav">
         <div className="logo">
           <img src={logo} alt="Logo" width={50} height={50} />
@@ -34,22 +39,36 @@ const ContactUs = () => {
           <button onClick={() => navigate('/')} className="nav-button">Home</button>
         </div>
       </nav>
+
+      {/* Head Card */}
+      {head && (
+        <div className="head-card">
+          <div className="team-card" onClick={() => setSelectedMember(head[1])}>
+            <img src={head[1].img} alt={head[1].name} />
+            <div className="details">
+              <p>{head[1].name}</p>
+              <div>{head[1].role}</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Other Members */}
       <div className='card-container justify-content-center align-items-center p-1'>
         <div className='col-12 cards'>
-          {Object.entries(data).map(([key, member]) => (
+          {others.map(([key, member]) => (
             <div className='team-card' key={key} onClick={() => setSelectedMember(member)}>
               <img src={member.img} alt={member.name} />
-              <div className='details'>
+              <div className="details">
                 <p>{member.name}</p>
                 <div>{member.role}</div>
-                {/* <button className="openButton">Open</button> */}
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* MODAL - Pop-up Window */}
+      {/* Modal (if needed later) */}
       {
         // selectedMember && (
         //   <div className="modal">
@@ -63,9 +82,8 @@ const ContactUs = () => {
         //   </div>
         // )
       }
-    </div >
+    </div>
   );
 };
 
 export default ContactUs;
-
