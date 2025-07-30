@@ -142,7 +142,7 @@ const App = () => {
             )
           }>
           <Route path="Dashboard" element={<StudentHome role={role} userData={userData} />} />
-          <Route path="Profile" element={<StudentProfile role={role} />} />
+          <Route path="Profile" element={<StudentProfile role={role} loggedInUser={loggedInUser}/>} />
           <Route path="Resume" element={<Resume role={role} />} />
           <Route path="Resources" element={<Resources role={role} />} />
           <Route path="JobPosting" element={<JobPosting role={role} />} />
