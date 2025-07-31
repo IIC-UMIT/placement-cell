@@ -12,3 +12,22 @@
   }
   
   
+  .internship-chart-container {
+  background-color: white;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  width: 100%;
+  max-width: 1200px;
+  margin: auto;
+}
+
+.chart-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #003049;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #003049;
+  text-align: left;
+}

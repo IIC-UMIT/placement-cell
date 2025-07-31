@@ -1,11 +1,11 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { getDatabase, ref, get } from "firebase/database";
 import '../styles/LandingPage.css';
 import BranchWise from "../components/BranchWise";
-import CompanyWise from '../components/CompanyWise';
 import CtcHighlight from "../components/CtcHighlight";
 import InternshipStatistics from '../components/InternshipStat';
+import YearlyPlaced from '../components/YearlyPlaced';
 
 function Home() {
   const navigate = useNavigate();
@@ -207,7 +207,7 @@ function Home() {
         <div className="layout">
           <div className="charts-grid">
             <div className="line-chart-container">
-              <h2>Yearly Placement Data</h2>
+              <h2>CTC Highlight</h2>
               {/* <Line data={lineData} options={{ scales: { y: { beginAtZero: true } } }} /> */}
               <CtcHighlight />
             </div>
@@ -217,16 +217,17 @@ function Home() {
               <InternshipStatistics />
               </div>
               <div className="chart-container">
-                <h2>Branch-wise Placements</h2>
+                <h2>Yearly Placements</h2>
                 {/* <Bar data={barData} options={{ scales: { y: { beginAtZero: true } } }} /> */}
-                <BranchWise />
+                
+                <YearlyPlaced />
               </div>
             </div>
           </div>
           <div className="dougnut-chart-container">
-            <h2>Company-wise Placements</h2>
+            <h2>Branch-wise Placements</h2>
             {/* <Doughnut data={doughnutData} width="200px" height="200px" /> */}
-            <CompanyWise />
+            <BranchWise />
           </div>
         </div>
 

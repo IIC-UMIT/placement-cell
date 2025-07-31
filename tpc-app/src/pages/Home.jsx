@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import '../styles/Home.css';
 import { useNavigate, Link } from 'react-router-dom';
 import logo from '../assets/images/IIIC-logo.png';
@@ -9,7 +9,6 @@ import Facebook from "../assets/images/facebook.png";
 import Instagram from "../assets/images/instagram.png";
 import Twitter from "../assets/images/twitter.png";
 import AboutUs from "../assets/images/AboutUs.PNG"
-import { Bar } from 'react-chartjs-2';
 
 import BranchWise from "../components/BranchWise";
 import CompanyWise from '../components/CompanyWise';
@@ -234,14 +233,14 @@ function Home() {
                 <InternshipStat/>
               </div>
               <div className="chart-container">
-                {/* <h2>Branch-wise Placements</h2>
-                <Bar data={barData} options={{ scales: { y: { beginAtZero: true } } }} /> */}
+                <h2>Branch-wise Placements</h2>
+                {/* <Bar data={barData} options={{ scales: { y: { beginAtZero: true } } }} /> */} 
                 <BranchWise />
               </div>
             </div>
           </div>
           <div className="dougnut-chart-container">
-            <h2>Company-wise Placements</h2>
+            <h2>Branch-wise Placements</h2>
             {/* <Doughnut data={doughnutData} width="200px" height="200px" /> */}
             <CompanyWise/>
           </div>
