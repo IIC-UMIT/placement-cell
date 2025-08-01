@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Route, Routes, Navigate } from 'react-router-dom';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/database';
@@ -21,7 +21,7 @@ import StudentApplied from './pages/StudentApplied.jsx';
 import StudentHome from './pages/StudentHome.jsx';
 import StudentDashboard from './pages/StudentDashboard.jsx';
 import StudentProfile from './pages/StudentProfile.jsx';
-import Resume from './pages/Resume.jsx';
+// import Resume from './pages/Resume.jsx';
 import Resources from './pages/StudentResources.jsx';
 import JobPosting from './pages/StudentJobPosting.jsx'
 import PlacementGuidelines from './pages/PlacementGuidelines.jsx';
@@ -43,63 +43,29 @@ const App = () => {
   const [loggedInUser, setLoggedInUser] = useState(null); // Store logged-in user ID
   const [userData, setUserData] = useState(null);
   const [role, setRole] = useState(null); // Store role of logged-in user
-  const [loading, setLoading] = useState(true);
-
-  // useEffect(() => {
-  //   firebase.auth().onAuthStateChanged(async (user) => {
-  //     if (user) {
-  //       const userId = user.uid;
-  //       setLoggedInUser(userId);
-
-  //       // Fetch the role from Firebase Database
-  //       const userRef = await firebase.database().ref(`users/${loggedInUser}`).once('value');
-  //       const usersData = userRef.val();
-  //       let userRole = null;
-
-  //       // Check which role the user falls under
-  //       if (usersData.Student[userId] && usersData.Student[userId].role==='Student') {
-  //         userRole = 'Student';
-  //       } else if (usersData.Recruiter[userId] && usersData.Recruiter[userId].role==='Recruiter') {
-  //         userRole = 'Recruiter';
-  //       } else if (usersData.Coordinator[userId] && usersData.Coordinator[userId].role==='Coordinator') {
-  //         userRole = 'Coordinator';
-  //       }
-
-  //       setRole(userRole); // Set the role for conditional access
-  //       setLoading(false);
-  //     } else {
-  //       setLoggedInUser(null);
-  //       setRole(null);
-  //       setLoading(false);
-  //     }
-  //   });
-  // }, [loggedInUser]);
 
   console.log(loggedInUser)
+  console.log(role)
 
   useEffect(() => {
     const unsubscribe = firebase.auth().onAuthStateChanged(async (user) => {
       if (user) {
         const userId = user.uid;
+        setLoggedInUser(userId);
         try {
-          let userRole = null;
-          let userInfo = null;
-
           // Check each role database separately
           const roles = ["Student", "Recruiter", "Coordinator"];
+          let found = false
           for (const role of roles) {
             const userRef = await firebase.database().ref(`users/${role}/${userId}`).once("value");
-            if (userRef.exists()) {
-              userRole = role;
-              userInfo = userRef.val(); // Fetch user details
-              break; // Stop once the role is found
-            }
+            if (userRef.exists()) {}
+            setRole(role);
+            setUserData({ ...userRef, role: role }); // Add role to user data
+            found = true;
+            break; // Exit loop once user is found in one of the roles
           }
 
-          if (userRole && userInfo) {
-            setRole(userRole);
-            setUserData({ ...userInfo, role: userRole }); // Add role to user data
-          } else {
+          if (!found) {
             setRole(null);
             setUserData(null);
           }
@@ -109,22 +75,16 @@ const App = () => {
           setUserData(null);
         }
       } else {
+         setLoggedInUser(null);
         setRole(null);
         setUserData(null);
       }
-
-      setLoading(false);
     });
 
     return () => unsubscribe();
   }, []);
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
   return (
-    <Router>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/Team" element={<Team />} />
@@ -145,7 +105,7 @@ const App = () => {
           }>
           <Route path="Dashboard" element={<StudentHome role={role} userData={userData} />} />
           <Route path="Profile" element={<StudentProfile role={role} loggedInUser={loggedInUser}/>} />
-          <Route path="Resume" element={<Resume role={role} />} />
+          {/* <Route path="Resume" element={<Resume role={role} />} /> */}
           <Route path="Resources" element={<Resources role={role} />} />
           <Route path="JobPosting" element={<JobPosting role={role} />} />
           <Route path="EventDashboard" element={<EventDashboard role={role} />} />
@@ -187,10 +147,7 @@ const App = () => {
         {/* Catch-all route */}
         <Route path="*" element={<PageNotFound />} />
       </Routes>
-    </Router >
   );
 };
-
-
 
 export default App;

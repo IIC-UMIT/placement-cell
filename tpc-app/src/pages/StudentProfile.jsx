@@ -403,7 +403,7 @@ function StudentProfile({ loggedInUser }) {
                 }
               }}
             />
-            <label htmlFor="hasBacklog" style={{ margin: 0, fontWeight: 'normal', cursor: 'pointer' }}>
+            <label htmlFor="hasBacklog" style={{ margin: 0, fontWeight: 'bold', cursor: 'pointer', fontSize: '16px'}}>
               Have you ever had a backlog?
             </label>
           </div>
@@ -446,11 +446,6 @@ function StudentProfile({ loggedInUser }) {
             </div>
           )}
         </div>
-        {/* Skills */}
-        {/* <div className="form-group">
-          <label>Skill Set (Programming Languages):</label>
-          <input type="text" name="skills" value={studentData.skills} onChange={handleChange} />
-        </div> */}
 
         {/* Experience */}
         <div className="form-group">

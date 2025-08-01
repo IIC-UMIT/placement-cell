@@ -10,7 +10,6 @@ import YearlyPlaced from '../components/YearlyPlaced';
 function Home() {
   const navigate = useNavigate();
   const [logos, setLogos] = useState([]);
-  const [selectedRole, setSelectedRole] = useState('');
   const [activated, setActivated] = useState(false);
   const [counters, setCounters] = useState([
     { label: "Student Placed", count: 167, value: 0 },
@@ -116,10 +115,8 @@ function Home() {
     }
   }, [activated]);  // Ensure the dependency array is correct
 
-  const handleRoleSelect = (role) => {
-    setSelectedRole(role);
-    // Navigate to the login page and pass selectedRole as state
-    navigate('/login', { state: { selectedRole: role } });
+  const handleLogin = () => {
+    navigate('/login');
   };
 
   return (
@@ -151,13 +148,13 @@ function Home() {
             </div>
           </div>
           <div className="login-buttons">
-            <button onClick={() => handleRoleSelect('Student')}>
+            <button onClick={() => handleLogin()}>
               <svg fill="#FFFFFF" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" width="25px" height="30px" viewBox="0 0 600 481.119" xmlSpace="preserve"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <g> <g id="Layer_2_31_"> <g> <path d="M80.13,89.836c6.763,3.805,64.945,31.734,64.945,31.734s-0.016,30.356-0.016,38.571 c0,105.197-43.24,115.07-31.602,123.201c2.563,1.789,33.903,2.949,73.783,3.484c14.103,9.342,32.798,15.057,53.318,15.133 c20.521-0.076,39.216-5.791,53.318-15.133c39.88-0.535,71.221-1.695,73.782-3.484c11.641-8.131-31.6-18.004-31.6-123.201 c0-8.215-0.016-38.57-0.016-38.57s26.062-12.512,45.329-21.928v44.448c-3.342,1.97-5.689,5.452-5.689,9.603 c0,3.674,1.864,6.788,4.583,8.846c0,0-4.832,27.166-6.395,35.154c-1.563,7.988,27.559,6.387,26.247,0 c-1.311-6.387-6.394-35.154-6.394-35.154c2.719-2.058,4.585-5.172,4.585-8.846c0-4.15-2.339-7.633-5.679-9.603V94.104 c4.084-2.029,7.104-3.563,8.355-4.268c6.763-3.807,7.763-9.605-1.862-14.318C360.155,56.442,260.8,7.817,250.976,3.131 C246.877,1.178,243.474,0.268,240.56,0c-2.914,0.268-6.318,1.178-10.416,3.131c-9.824,4.686-109.18,53.311-148.151,72.387 C72.368,80.231,73.368,86.03,80.13,89.836z"></path> <path d="M353.227,343.084c-15.685-5.656-42.989-21.961-47.666-24.477c-1.213-0.705-2.616-1.117-4.121-1.117 c-3.282,0-6.105,1.928-7.423,4.715c-12.888,21.572-36.735,84.145-53.457,85.754c-16.722-1.609-40.57-64.182-53.457-85.754 c-1.316-2.787-4.14-4.715-7.423-4.715c-1.504,0-2.908,0.412-4.121,1.117c-4.677,2.516-31.981,18.82-47.666,24.477 c-52.65,18.984-76.33,38.346-76.33,51.547c0,13.188,0,86.488,0,86.488H240.56h188.997c0,0,0-73.301,0-86.488 C429.557,381.43,405.877,362.069,353.227,343.084z"></path> </g> </g> </g> </g></svg>
               Student</button>
-            <button onClick={() => handleRoleSelect('Recruiter')}>
+            <button onClick={() => handleLogin()}>
               <svg fill="#ffffff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" enableBackground="new 0 0 100 100" xmlSpace="preserve" stroke="#ffffff" width="30px" height="30px"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M37.3,31.9h21.8c1.1,0,2-0.9,2-2v-4c0-3.3-2.7-5.9-5.9-5.9H41.3c-3.3,0-5.9,2.7-5.9,5.9v4 C35.3,31,36.2,31.9,37.3,31.9z"></path> <path d="M70,24.9h-2c-0.6,0-1,0.4-1,1v4c0,4.4-3.6,7.9-7.9,7.9H37.3c-4.4,0-7.9-3.6-7.9-7.9v-4c0-0.6-0.4-1-1-1h-2 c-3.3,0-5.9,2.7-5.9,5.9v40.6c0,3.3,2.7,5.9,5.9,5.9h20c2.8,0,3.1-2.3,3.1-3.1V52.8c0-2.3,1.3-2.8,2-2.8h21.6c2.4,0,2.8-2.1,2.8-2.8 V31C76,27.6,73.3,24.9,70,24.9z"></path> <path d="M78.4,60.4H56.6c-0.6,0-1.1-0.5-1.1-1.1v-2.2c0-0.6,0.5-1.1,1.1-1.1h21.8c0.6,0,1.1,0.5,1.1,1.1v2.2 C79.5,59.9,79,60.4,78.4,60.4z M78.4,70.2H56.6c-0.6,0-1.1-0.5-1.1-1.1v-2.2c0-0.6,0.5-1.1,1.1-1.1h21.8c0.6,0,1.1,0.5,1.1,1.1v2.2 C79.5,69.7,79,70.2,78.4,70.2z M78.4,80H56.6c-0.6,0-1.1-0.5-1.1-1.1v-2.2c0-0.6,0.5-1.1,1.1-1.1h21.8c0.6,0,1.1,0.5,1.1,1.1v2.2 C79.5,79.5,79,80,78.4,80z"></path> </g></svg>
               Recruiter</button>
-            <button onClick={() => handleRoleSelect('Coordinator')}><svg fill="#ffffff" width="30px" height="30px" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><circle cx="44.6" cy="36.2" r="16.1"></circle><path d="M48.8,79.6c2.8,0,1.2-1.9,1.2-1.9h0a19.22,19.22,0,0,1-4.2-12,18.65,18.65,0,0,1,1.7-7.9l.2-.4a1.17,1.17,0,0,0-.9-1.9h0a17.7,17.7,0,0,0-2.3-.1A24.35,24.35,0,0,0,20.4,76.3c0,1.2.4,3.5,4.2,3.5H48.3C48.7,79.6,48.7,79.6,48.8,79.6Z"></path><path d="M65.3,51.2A14.25,14.25,0,1,0,79.5,65.5,14.25,14.25,0,0,0,65.3,51.2Zm0,4.5a3.22,3.22,0,0,1,3.2,3.2,3.06,3.06,0,0,1-.7,2l2.3,4.3c.1.2,0,.4-.2.4a2.7,2.7,0,0,0-1.1.5c-.2.1-.4,0-.4-.1l-2.2-4.1a3.08,3.08,0,0,1-.9.1,3.22,3.22,0,0,1-3.2-3.2A3.08,3.08,0,0,1,65.3,55.7Zm-2,8.2L61.1,68a3.26,3.26,0,0,1,1,2.3,3.2,3.2,0,1,1-3.2-3.2h.4l2.3-4.3c.1-.2.2-.2.5-.1a2.87,2.87,0,0,0,1.1.6C63.3,63.7,63.4,63.9,63.3,63.9Zm8.3,9.8a3.29,3.29,0,0,1-3-1.9H64.2c-.2,0-.4-.2-.2-.4a2.48,2.48,0,0,0,.1-.9v-.2c0-.2.1-.4.2-.4h4.2a3.12,3.12,0,0,1,3.1-2.6,3.22,3.22,0,0,1,3.2,3.2A3.44,3.44,0,0,1,71.6,73.7Z"></path></g></svg>
+            <button onClick={() => handleLogin()}><svg fill="#ffffff" width="30px" height="30px" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"><circle cx="44.6" cy="36.2" r="16.1"></circle><path d="M48.8,79.6c2.8,0,1.2-1.9,1.2-1.9h0a19.22,19.22,0,0,1-4.2-12,18.65,18.65,0,0,1,1.7-7.9l.2-.4a1.17,1.17,0,0,0-.9-1.9h0a17.7,17.7,0,0,0-2.3-.1A24.35,24.35,0,0,0,20.4,76.3c0,1.2.4,3.5,4.2,3.5H48.3C48.7,79.6,48.7,79.6,48.8,79.6Z"></path><path d="M65.3,51.2A14.25,14.25,0,1,0,79.5,65.5,14.25,14.25,0,0,0,65.3,51.2Zm0,4.5a3.22,3.22,0,0,1,3.2,3.2,3.06,3.06,0,0,1-.7,2l2.3,4.3c.1.2,0,.4-.2.4a2.7,2.7,0,0,0-1.1.5c-.2.1-.4,0-.4-.1l-2.2-4.1a3.08,3.08,0,0,1-.9.1,3.22,3.22,0,0,1-3.2-3.2A3.08,3.08,0,0,1,65.3,55.7Zm-2,8.2L61.1,68a3.26,3.26,0,0,1,1,2.3,3.2,3.2,0,1,1-3.2-3.2h.4l2.3-4.3c.1-.2.2-.2.5-.1a2.87,2.87,0,0,0,1.1.6C63.3,63.7,63.4,63.9,63.3,63.9Zm8.3,9.8a3.29,3.29,0,0,1-3-1.9H64.2c-.2,0-.4-.2-.2-.4a2.48,2.48,0,0,0,.1-.9v-.2c0-.2.1-.4.2-.4h4.2a3.12,3.12,0,0,1,3.1-2.6,3.22,3.22,0,0,1,3.2,3.2A3.44,3.44,0,0,1,71.6,73.7Z"></path></g></svg>
               Coordinator</button>
           </div>
         </div>

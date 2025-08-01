@@ -1,5 +1,5 @@
 import { Doughnut } from "react-chartjs-2";
-import "./styles/CompanyWise.css";
+import "./styles/BranchWise.css";
 
 const CompanyWise = () => {
   const data = {

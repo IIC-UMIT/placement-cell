@@ -4,7 +4,7 @@ import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import "../styles/LoginPage.css";
 
-function LoginPage({ setLoggedInUser }) {
+function LoginPage({ setLoggedInUser,setRole }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -33,6 +33,8 @@ function LoginPage({ setLoggedInUser }) {
 
       if (userRef.exists()) {
         setLoggedInUser(loggedInUserId);
+        setRole(activeRole); // Set the role here
+
         // Navigate to the respective page
         if (activeRole === "Student") navigate("/Student/Dashboard");
         else if (activeRole === "Recruiter") navigate("/Recruiter/Dashboard");

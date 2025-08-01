@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import firebase from "firebase/compat/app";
-// import "../styles/PageNotFound.css";
+import "../styles/PageNotFound.css";
 
 const PageNotFound = () => {
   return (
@@ -14,7 +14,7 @@ const PageNotFound = () => {
           changed, or is temporarily unavailable.
         </p>
         <Link
-          to="/dashboard/"
+          to="/"
           className="btn-home"
           onClick={() => firebase.auth().signOut()}
         >

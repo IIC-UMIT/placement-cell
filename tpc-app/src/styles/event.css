@@ -204,12 +204,11 @@
   margin-top: 20px;
 }
 
-/* Responsive Design */
+
 @media (max-width: 768px) {
   .events-content {
     flex-direction: column;
     align-items: center;
-    /* More space for small screens */
   }
 
   .scroll-content img {

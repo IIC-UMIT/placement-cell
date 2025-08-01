@@ -9,8 +9,7 @@ const StudentDetailsPage = () => {
   const [student, setStudent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('profile');
-  
-  // Fetch student data
+
   useEffect(() => {
     const fetchStudentDetails = async () => {
       try {

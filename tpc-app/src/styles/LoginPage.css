@@ -200,9 +200,7 @@ button[type="submit"]:hover {
     padding: 0;
     transition: color 0.3s ease;
     width: 200px;
-    /* Fixed width to prevent shifting */
     text-align: left;
-    /* Centers text inside the fixed-width button */
 }
 
 .toggleShowPassword:hover {
