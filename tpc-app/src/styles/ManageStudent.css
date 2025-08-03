@@ -1,137 +1,119 @@
   /* ManageStudent.css */
-.manage-student-container {
+/* StudentDetails.css */
+
+/* Container styling */
+.Manage-Student-Container {
   padding: 20px;
   background-color: #f4f7fc;
   border-radius: 10px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   width: 81vw;
+  margin: 0 auto;
 }
 
-.header {
+/* Page Title */
+.Manage-Student-Container h1 {
   font-size: 24px;
   color: #003049;
   text-align: center;
   margin-bottom: 20px;
 }
 
-.form-container {
+/* Filter and search sections */
+.filter-container,
+.search-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+/* Input fields and selects */
+.filter-container label,
+.search-container input {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  max-width: 400px;
-  margin: 0 auto;
+  font-size: 14px;
+  color: #003049;
 }
 
-.input-field {
+.filter-container select,
+.search-container input {
   padding: 10px;
   border: 1px solid #003049;
-  border-radius: 10px;
+  border-radius: 8px;
   font-size: 14px;
-  width: 100%;
+  width: 200px;
 }
 
-.input-field:focus {
+.filter-container select:focus,
+.search-container input:focus {
   outline: none;
-  border-color: #fdf0d5;
+  border-color: #669bbc;
 }
 
-.submit-button {
-  padding: 12px;
-  border: none;
-  background-color: #003049;
-  color: white;
-  font-size: 16px;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.submit-button:hover {
-  background-color: #669bbc;
-}
-
-.search-container {
-  max-width: 400px;
-  margin: 20px auto;
-}
-
-.search-field {
-  padding: 10px;
-  border: 1px solid #003049;
-  border-radius: 10px;
-  font-size: 14px;
-  width: 100%;
-}
-
-.users-table {
+/* Table styling */
+table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 20px;
+  font-size: 14px;
 }
 
-.users-table th,
-.users-table td {
+/* Header row */
+table th {
+  background-color: #003049;
+  color: white;
   padding: 12px;
   text-align: left;
+}
+
+/* Table data cells */
+table td {
+  background-color: #ffffff;
+  padding: 12px;
   border: 1px solid #003049;
 }
 
-.users-table th {
-  background-color: #003049;
-  color: white;
-}
-
-.users-table td {
-  background-color: #f9f9f9;
-}
-
-.users-table tr:nth-child(even) {
+/* Alternating rows */
+table tr:nth-child(even) {
   background-color: #f1f1f1;
 }
 
-.users-table tr:hover {
+/* Hover effect */
+table tr:hover {
   background-color: #e2e2e2;
 }
 
-.export-button {
-  padding: 12px;
-  border: none;
-  background-color: #669bbc;;
+/* Links inside table */
+table td a {
+  color: #003049;
+  text-decoration: none;
+}
+table td a:hover {
+  text-decoration: underline;
+}
+
+/* Download button */
+.Manage-Student-Container button {
+  padding: 12px 20px;
+  background-color: #003049;
   color: white;
-  font-size: 16px;
-  border-radius: 10px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
   cursor: pointer;
   transition: background-color 0.3s ease;
-  margin-top: 20px;
-  margin-left: 25vw;
-  width: 30vw;
-  display: flex;
-  justify-content: center;
+  display: block;
+  margin: 20px auto;
 }
 
-.export-button:hover {
-  background-color: #c1121f;
+.Manage-Student-Container button:hover {
+  background-color: #669bbc;
 }
 
-@media (max-width: 768px) {
-  .form-container {
-    max-width: 100%;
-  }
-
-  .search-container {
-    max-width: 100%;
-  }
-
-  .users-table th,
-  .users-table td {
-    padding: 8px;
-  }
-}
-
-
-
-/* StudentD Details  */
-/* Modal for field selection */
+/* Modal styling */
 .modal {
   position: fixed;
   top: 0;
@@ -142,13 +124,33 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 999;
 }
 
 .modal-content {
-  background-color: white;
+  background-color: #ffffff;
   padding: 20px;
   border-radius: 10px;
   width: 300px;
+}
+
+.modal-content h4 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: #003049;
+}
+
+.modal-content form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.modal-content label {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  gap: 6px;
 }
 
 .modal-buttons {
@@ -157,15 +159,29 @@
   margin-top: 10px;
 }
 
-.downloadbutton button {
-  padding: 10px;
+.modal-buttons button {
+  padding: 8px 12px;
   background-color: #003049;
   color: white;
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  font-size: 14px;
 }
 
-.downloadbutton button:hover {
-  background-color: #fdf0d5;
+.modal-buttons button:hover {
+  background-color: #669bbc;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .filter-container,
+  .search-container {
+    flex-direction: column;
+    align-items: center;
+  }
+  table th,
+  table td {
+    padding: 8px;
+  }
 }

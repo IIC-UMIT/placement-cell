@@ -171,21 +171,53 @@ function RecruiterPage() {
         }
     };
 
+    // const handleFormChange = (e) => {
+    //     const { name, value } = e.target;
+    //     setFormData((prevData) => ({
+    //         ...prevData,
+    //         [name]: value,
+    //     }));
+        
+    //     if (value && value.trim() !== '') {
+    //         setMissingFields((prev) => {
+    //             const updated = { ...prev };
+    //             delete updated[name];
+    //             return updated;
+    //         });
+    //     }
+    // };
+
     const handleFormChange = (e) => {
-        const { name, value } = e.target;
-        setFormData((prevData) => ({
-            ...prevData,
-            [name]: value,
-        }));
-        // Remove error message for this field if filled
-        if (value && value.trim() !== '') {
-            setMissingFields((prev) => {
-                const updated = { ...prev };
-                delete updated[name];
-                return updated;
-            });
-        }
-    };
+  const { name, value } = e.target;
+  const keys = name.split(".");
+
+  setFormData((prevData) => {
+    const updatedData = { ...prevData };
+    let current = updatedData;
+
+    for (let i = 0; i < keys.length - 1; i++) {
+      const key = keys[i];
+      if (!(key in current)) {
+        current[key] = {};
+      }
+      current = current[key];
+    }
+
+    current[keys[keys.length - 1]] = value;
+
+    return updatedData;
+  });
+
+  // Remove error message for this field if filled
+  if (value && value.trim() !== "") {
+    setMissingFields((prev) => {
+      const updated = { ...prev };
+      delete updated[name];
+      return updated;
+    });
+  }
+};
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -420,14 +452,24 @@ function RecruiterPage() {
                                 No. of Expected Hires
                                 <span className="required-asterisk">*</span>
                             </label>
-                            <input
+                            {/* <input
                                 type="number"
                                 name="placement.noOfExpectedHires"
                                 ref={requiredRefs['placement.noOfExpectedHires']}
                                 value={formData.placement.noOfExpectedHires}
                                 onChange={handleFormChange}
                                 placeholder="Enter expected number of hires"
-                            />
+                            /> */}
+
+                            <input
+  type="number"
+  name="placement.noOfExpectedHires"
+  ref={requiredRefs['placement.noOfExpectedHires']}
+  value={formData.placement.noOfExpectedHires || ''}
+  onChange={handleFormChange}
+  placeholder="Enter expected number of hires"
+/>
+
                             {missingFields['placement.noOfExpectedHires'] && (
                                 <div className="required-message">This is a required field</div>
                             )}

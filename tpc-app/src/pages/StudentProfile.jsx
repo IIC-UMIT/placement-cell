@@ -383,7 +383,9 @@ function StudentProfile({ loggedInUser }) {
         <div className="form-group">
           {/* Use htmlFor and unique ids for labels and checkboxes */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <input
+
+
+            {/* <input
               id="hasBacklog"
               type="checkbox"
               checked={studentData.backlog === "Yes" || !!studentData.clearedKT}
@@ -402,7 +404,31 @@ function StudentProfile({ loggedInUser }) {
                   }));
                 }
               }}
-            />
+            /> */}
+
+            <input
+  id="hasBacklog"
+  type="checkbox"
+  checked={studentData.backlog === "Yes" || !!studentData.clearedKT}
+  onChange={e => {
+    if (e.target.checked) {
+      setStudentData(prev => ({
+        ...prev,
+        backlog: "Yes",
+      }));
+    } else {
+      setStudentData(prev => ({
+        ...prev,
+        backlog: "No",
+        backlogCount: '',
+        clearedKT: ''
+      }));
+    }
+  }}
+/>
+
+
+
             <label htmlFor="hasBacklog" style={{ margin: 0, fontWeight: 'bold', cursor: 'pointer', fontSize: '16px'}}>
               Have you ever had a backlog?
             </label>
