@@ -30,6 +30,9 @@ const ContactUs = () => {
 
   return (
     <div className='teamContainer container-fluid'>
+       <h1 className="text-center mt-4">
+      <span style={{ color: "black" }}>Meet the</span> <span style={{ color: "#003049" , fontWeight: 'bold'}}>Team.</span>
+    </h1>
       {/* Navigation */}
       <nav className="nav">
         <div className="logo">

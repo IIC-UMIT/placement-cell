@@ -38,7 +38,6 @@ import EventDashboard from './pages/TPOEvent.jsx';
 import './chartSetup';
 import "bootstrap/dist/css/bootstrap.min.css";
 
-
 const App = () => {
   const [loggedInUser, setLoggedInUser] = useState(null); // Store logged-in user ID
   const [userData, setUserData] = useState(null);
