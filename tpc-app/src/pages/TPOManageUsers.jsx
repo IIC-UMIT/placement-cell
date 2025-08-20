@@ -3,7 +3,7 @@ import "firebase/compat/auth";
 import firebase from 'firebase/compat/app';
 import { saveAs } from 'file-saver'; // for Excel download
 import * as XLSX from 'xlsx';
-import '../styles/ManageStudent.css';
+import '../styles/ManageUsers.css';
 
 const sendEmail = async (to, subject, body) => {
   try {
@@ -43,13 +43,14 @@ const ExcelUserUploader = ({ sendEmail }) => {
         const email = row["Email Id"]?.trim();
         const name = row["Full name"]?.trim();
         const rollNo = row["Roll No."]?.toString().trim();
+        const role = row["Role"]?.trim();
 
-        if (!email || !name || !rollNo) {
+        if (!email || !name || !rollNo || !role) {
           console.warn("⚠️ Skipping invalid row:", row);
           return null; // Skip invalid rows
         }
 
-        return { email, name, rollNo };
+        return { email, name, rollNo, role };
       }).filter(Boolean); // Remove null entries
 
       setUsers(formatted);
@@ -69,7 +70,7 @@ const ExcelUserUploader = ({ sendEmail }) => {
     console.log("📤 Starting user creation...");
 
     for (const user of users) {
-      if (!user.email || !user.name || !user.rollNo) {
+      if (!user.email || !user.name || !user.rollNo || !user.role) {
         console.warn("⚠️ Skipping invalid row:", user);
         continue;
       }
@@ -120,11 +121,19 @@ const ExcelUserUploader = ({ sendEmail }) => {
 
   return (
     <div>
-      <h2>📥 Excel User Uploader</h2>
-      <input type="file" accept=".xlsx, .xls" onChange={handleFileUpload} />
-      <button onClick={handleCreateUsers} disabled={!users.length}>
-        Create Users
-      </button>
+      <h2>Create Multiple User</h2>
+      <p>
+        Upload an Excel file with columns: Email Id, Full name, Roll No., Role. Ensure all fields are filled correctly. 
+        <a href="https://docs.google.com/spreadsheets/d/1vhIwD_C_KxNI_kyjWrj1nHsBDSyC5sMaGK5Gluct13U/edit?usp=sharing" target="_blank" rel="noopener noreferrer" style={{ color: 'red', textDecoration: 'underline' }}>
+          Link
+        </a>
+      </p>
+      <div style={{ display: 'flex', flexDirection: 'row', gap: '10px' }}>
+        <input type="file" accept=".xlsx, .xls" onChange={handleFileUpload} />
+        <button className="submit-button" onClick={handleCreateUsers} disabled={!users.length}>
+          Create Users
+        </button>
+      </div>
       <p>{status}</p>
     </div>
   );
@@ -137,22 +146,29 @@ const ManageStudent = () => {
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [searchName, setSearchName] = useState('');
+  const [searchRole, setSearchRole] = useState('');
+  const [role, setRole] = useState(''); // State for selected role
+  const [status, setStatus] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const usersPerPage = 10;
 
   // Fetch users from the database on component mount
   useEffect(() => {
     const fetchUsers = async () => {
-      const usersRef = firebase.database().ref('users/Student');
+      const usersRef = firebase.database().ref('users');
       const snapshot = await usersRef.get();
       if (snapshot.exists()) {
         const usersData = snapshot.val();
 
-        // Convert usersData object to an array
-        const usersList = Object.keys(usersData).map(key => ({
-          ...usersData[key],
-          userId: key, // Add userId for referencing
-        }));
+        const usersList = Object.keys(usersData).flatMap(roleKey => {
+          const roleUsers = usersData[roleKey];
+          return Object.keys(roleUsers).map(userId => ({
+            ...roleUsers[userId],
+            userId,
+            role: roleKey, // Add role dynamically
+          }));
+        });
 
-        // Set both users and filteredUsers
         setUsers(usersList);
         setFilteredUsers(usersList);
       }
@@ -163,19 +179,27 @@ const ManageStudent = () => {
 
   // Filter users as searchName changes (live search)
   useEffect(() => {
-    if (!searchName) {
-      setFilteredUsers(users);
-    } else {
-      const filtered = users.filter(user =>
+    let filtered = users;
+
+    if (searchName) {
+      filtered = filtered.filter(user =>
         user.name && user.name.toLowerCase().includes(searchName.toLowerCase())
       );
-      setFilteredUsers(filtered);
     }
-  }, [searchName, users]);
+
+    if (searchRole) {
+      filtered = filtered.filter(user =>
+        user.role && user.role.toLowerCase().includes(searchRole.toLowerCase())
+      );
+    }
+
+    setFilteredUsers(filtered);
+    setCurrentPage(1);
+  }, [searchName, searchRole, users]);
 
   // Handle creating a user without logging them in
   const handleCreateUser = async () => {
-    if (!name || !email || !password) {
+    if (!name || !email || !password || !role) { // Ensure role is selected
       alert('Please fill in all fields');
       return;
     }
@@ -190,6 +214,7 @@ const ManageStudent = () => {
           password,
           name,
           rollNo: "N/A", // Add rollNo if applicable
+          role, // Include role in the payload
         }),
       });
 
@@ -205,6 +230,7 @@ const ManageStudent = () => {
       setName('');
       setEmail('');
       setPassword('');
+      setRole(''); // Reset role
     } catch (error) {
       console.error('Error creating user:', error);
       alert('An error occurred while creating the user.');
@@ -219,6 +245,12 @@ const ManageStudent = () => {
     const excelFile = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
     saveAs(new Blob([excelFile]), 'users.xlsx');
   };
+
+  // Pagination
+  const indexOfLastUser = currentPage * usersPerPage;
+  const indexOfFirstUser = indexOfLastUser - usersPerPage;
+  const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
+  const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
 
   return (
     <div className="manage-student-container">
@@ -245,10 +277,21 @@ const ManageStudent = () => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
+        <select
+          className="input-field"
+          value={role}
+          onChange={(e) => setRole(e.target.value)}
+        >
+          <option value="">Select Role</option>
+          <option value="Student">Student</option>
+          <option value="Recruiter">Recruiter</option>
+          <option value="Coordinator">Coordinator</option>
+        </select>
         <button className="submit-button" onClick={handleCreateUser}>Create User</button>
+        <button className="export-button" onClick={exportToExcel}>Download Excel</button>
       </div>
 
-      <div className="search-container">
+      <div className="searchbar-container flex align-items-center" style={{ width: '100%', gap: '10px' }}>
         <input
           className="search-field"
           type="text"
@@ -256,6 +299,36 @@ const ManageStudent = () => {
           value={searchName}
           onChange={(e) => setSearchName(e.target.value)}
         />
+        <select
+          className="search-field"
+          value={searchRole}
+          onChange={(e) => setSearchRole(e.target.value)}
+        >
+          <option value="">All</option>
+          <option value="Student">Student</option>
+          <option value="Recruiter">Recruiter</option>
+          <option value="Coordinator">Coordinator</option>
+        </select>
+        <span className="user-count" style={{ width: "200px" }}>
+          Users: {filteredUsers.length}
+        </span>
+        <div className="pagination-container" style={{ width: "400px" }}>
+          <button
+            className="submit-button"
+            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+          >
+            ◀
+          </button>
+          <span> {currentPage} of {totalPages}</span>
+          <button
+            className="submit-button"
+            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+            disabled={currentPage === totalPages}
+          >
+            ▶
+          </button>
+        </div>
       </div>
 
       <table className="users-table">
@@ -263,20 +336,20 @@ const ManageStudent = () => {
           <tr>
             <th>Name</th>
             <th>Email</th>
-            <th>Password</th>
+            <th>Role</th>
             <th>Created On</th>
             <th>Created By</th>
           </tr>
         </thead>
         <tbody>
-          {filteredUsers.length > 0 ? (
-            filteredUsers.map((user, index) => (
+          {currentUsers.length > 0 ? (
+            currentUsers.map((user, index) => (
               <tr key={index}>
                 <td>{user.name}</td>
                 <td>{user.email}</td>
-                <td>{user.password || 'N/A'}</td>
-                <td>{user.createdOn}</td>
-                <td>{user.createdBy}</td>
+                <td>{user.role || 'N/A'}</td>
+                <td>{user.createdOn || 'N/A'}</td>
+                <td>{user.createdBy || 'N/A'}</td>
               </tr>
             ))
           ) : (
@@ -287,12 +360,8 @@ const ManageStudent = () => {
         </tbody>
       </table>
 
-      <div className='downloadbutton'>
-      <button className="export-button" onClick={exportToExcel}>Download Excel</button>
-    </div>
-
-    {/* Integrate ExcelUserUploader */}
-    <ExcelUserUploader sendEmail={sendEmail} />
+      {/* Integrate ExcelUserUploader */}
+      <ExcelUserUploader sendEmail={sendEmail} />
     </div >
   );
 };

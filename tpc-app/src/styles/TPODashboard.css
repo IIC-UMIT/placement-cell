@@ -362,9 +362,9 @@
     display: flex;
     align-items: center;
 }
-
 .event-speaker p {
-    margin: 0 10px;
+    color: #003049;
+    font-weight: bold;
 }
 
 .event-speaker img {

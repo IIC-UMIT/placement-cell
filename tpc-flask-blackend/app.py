@@ -144,7 +144,7 @@ def create_user():
         roll_no = data.get("rollNo")
         role = data.get("role", "Student")  # Default role is "Student"
 
-        if not email or not password or not name:
+        if not email or not password or not name or not role:  # Ensure role is provided
             return jsonify({"success": False, "error": "Missing required fields"}), 400
 
         # Create user in Firebase Authentication
@@ -170,7 +170,7 @@ def create_user():
                 "rollNo": roll_no,
                 "createdOn": created_on  # Use formatted timestamp
             }
-            db.reference(f"users/{role}/{user.uid}").set(user_data)
+            db.reference(f"users/{role}/{user.uid}").set(user_data)  # Save under the correct role key
             print(f"✅ User details saved in Realtime Database: {user.uid}")
         except Exception as e:
             print(f"❌ Error saving user details in Realtime Database: {e}")

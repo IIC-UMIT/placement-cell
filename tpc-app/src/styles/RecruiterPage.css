@@ -41,6 +41,7 @@ input[type="number"],
 input[type="url"],
 input[type="tel"],
 input[type="date"],
+input[type="time"],
 textarea {
   width: 100%; /* Full width of the container */
   padding: 10px; /* Padding inside inputs */
