@@ -74,19 +74,19 @@ const StudentDashboard = () => {
                             </button>
                             <button
                                 className="sidebarButton"
-                                onClick={() => handleNavigation("/TPOPage/StudentDetails")}
+                                onClick={() => handleNavigation("/TPOPage/ManageUsers")}
                             >
-                                Student Details Dashboard
+                                Manage Users
                             </button>
                             <button
                                 className="sidebarButton"
-                                onClick={() => handleNavigation("/TPOPage/ManageStudent")}
+                                onClick={() => handleNavigation("/TPOPage/ManageStudents")}
                             >
                                 Manage Students
                             </button>
                             <button
                                 className="sidebarButton"
-                                onClick={() => handleNavigation("/TPOPage/ManageRecruiter")}
+                                onClick={() => handleNavigation("/TPOPage/ManageRecruiters")}
                             >
                                 Manage Recruiters
                             </button>

@@ -29,9 +29,9 @@ import PlacementGuidelines from './pages/PlacementGuidelines.jsx';
 import TPOHome from './pages/TPOHome.jsx';
 import TPODashboard from './pages/TPODashboard.jsx';
 import Blog from './pages/TPOBlog.jsx'
-import StudentDetails  from './pages/TPOManageStudent.jsx';
-import ManageRecruiter from './pages/TPOManageRecruiter.jsx';
-import ManageStudents from './pages/TPOManageUsers.jsx'
+import ManageStudents  from './pages/TPOManageStudent.jsx';
+import ManageRecruiters from './pages/TPOManageRecruiter.jsx';
+import ManageUsers from './pages/TPOManageUsers.jsx'
 import Announcements from './pages/TPOAnnouncements.jsx'
 import EventDashboard from './pages/TPOEvent.jsx';
 
@@ -122,7 +122,7 @@ const App = () => {
           }
         >
           <Route path="Dashboard" element={<RecruiterHome role={role} userData={userData} />} />
-          <Route path="JobDescription" element={<RecruiterPage role={role} />} />
+          <Route path="JobDescription" element={<RecruiterPage role={role} loggedInUser={loggedInUser}  />} />
           <Route path="RecruiterJDManager" element={<RecruiterJDManager role={role} />} />
           <Route path="StudentsApplied" element={<StudentApplied role={role} />} />
         </Route>
@@ -135,9 +135,9 @@ const App = () => {
           )
         }>
           <Route path="Home" element={<TPOHome />} />
-          <Route path="ManageStudent" element={<ManageStudents role={role} />} />
-          <Route path="StudentDetails" element={<StudentDetails role={role} />} />
-          <Route path="ManageRecruiter" element={<ManageRecruiter role={role} />} />
+          <Route path="ManageUsers" element={<ManageUsers role={role} />} />
+          <Route path="ManageStudents" element={<ManageStudents role={role} />} />
+          <Route path="ManageRecruiters" element={<ManageRecruiters role={role} />} />
           <Route path="Blog" element={<Blog role={role} />} />
           <Route path="Announcements" element={<Announcements role={role} />} />
           <Route path="EventDashboard" element={<EventDashboard role={role} />} />

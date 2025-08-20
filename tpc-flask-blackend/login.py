@@ -3,7 +3,7 @@ import firebase_admin
 from firebase_admin import credentials, auth
 
 # Initialize Firebase Admin
-cred = credentials.Certificate("path/to/serviceAccountKey.json")
+cred = credentials.Certificate("secret/iiic-umit-firebase-adminsdk-7jdc4-a5c4ecc0d0.json")
 firebase_admin.initialize_app(cred)
 
 # Read Excel file

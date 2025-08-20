@@ -70,7 +70,7 @@ const TPOHome = () => {
   useEffect(() => {
     const fetchAnnouncements = async () => {
       try {
-        const announcementsRef = firebase.database().ref("announcements");
+        const announcementsRef = firebase.database().ref("Announcements");
 
         announcementsRef.on("value", (snapshot) => {
           if (snapshot.exists()) {
@@ -131,7 +131,7 @@ const TPOHome = () => {
             <h2>Welcome to TPO Dashboard</h2>
           </div>
           {/* Stats Cards */}
-          <div className="card-box d-flex">
+          <div className="card-box d-flex flex-wrap justify-content-between flex-row">
             <div className="card-item">
               <h5>Total Students</h5>
               <p>{stats.totalStudents}</p>
@@ -151,11 +151,11 @@ const TPOHome = () => {
           </div>
 
           {/* Graph */}
-          <div className="chart-container">
+          {/* <div className="chart-container">
             <h5>Statistics</h5>
             <p>Progress Score</p>
             {/* Add chart here using Chart.js or other libraries */}
-          </div>
+          {/* </div> */} 
 
           <div className="events-section">
             <h2 className="section-title">Upcoming Events</h2>
@@ -183,14 +183,14 @@ const TPOHome = () => {
             )}
           </div>
 
-          <div className="companies-section">
+          {/* <div className="companies-section">
             <h2 className="section-title">Companies and Recruitment</h2>
             <ul>
               {stats.companies.map((company, index) => (
                 <li key={index}>{company.name}</li>
               ))}
             </ul>
-          </div>
+          </div> */}
         </div>
 
         <div className="RightBarDashboard">
@@ -224,14 +224,20 @@ const TPOHome = () => {
             </div>
           </div>
 
-          <div className="task-box">
-            <h5>Tasks</h5>
+          {/* <div className="interview-dates-card">
+            <h5>Interview Dates</h5>
             <ul>
-              <li>15% Listening - Speak 20 Minutes</li>
-              <li>15% Grammar - Learn 5 new rules</li>
-              <li>15% Pronunciation - Read 30 minutes</li>
+              {stats.interviewDates.length > 0 ? (
+                stats.interviewDates.map((date, index) => (
+                  <li key={index}>
+                    {date.date} - {date.company}
+                  </li>   
+                ))
+              ) : (
+                <li>No interview dates available.</li>  
+              )}
             </ul>
-          </div>
+          </div>   */}
         </div>
       </div>
   );

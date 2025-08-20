@@ -140,7 +140,7 @@ const EventDashboard = () => {
       <h2>Events</h2>
       <div className="event-grid">
         {events.map((event) => (
-          <div key={event.id} className="event-card" onClick={() => handleSelectEvent(event)}>
+          <div key={event.id} className="events-card" onClick={() => handleSelectEvent(event)}>
             <img src={event.image} alt={event.name} className="event-image" />
             <h3>{event.name}</h3>
             <p>{event.date} at {event.time}</p>

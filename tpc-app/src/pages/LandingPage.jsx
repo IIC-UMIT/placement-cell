@@ -21,19 +21,19 @@ function Home() {
     {
       name: "Shruti Rane",
       quote: "I am excited to start my journey at Visa. The experience and learning at college prepared me well!",
-      packageAmount: "INR 32,76,298",
+      packageAmount: "INR 32 LPA",
       company: "Visa",
     },
     {
       name: "Kirtee Sinha",
       quote: "Joining Visa is a dream come true! Thanks to the placement cell for their guidance.",
-      packageAmount: "INR 32,76,297",
+      packageAmount: "INR 32 LPA",
       company: "Visa",
     },
     {
       name: "Alam Sanjana",
       quote: "I am thrilled to be part of Visa. The hard work has truly paid off!",
-      packageAmount: "INR 32,76,296",
+      packageAmount: "INR 32 LPA",
       company: "Visa",
     },
   ];

@@ -3,7 +3,7 @@ import firebase from 'firebase/compat/app';
 import 'firebase/compat/database';
 import '../styles/RecruiterPage.css';
 
-function RecruiterPage() {
+function RecruiterPage({loggedInUser}) {
     const [companyDetails, setCompanyDetails] = useState({
         company_name: '',
         industry_sector: '',
@@ -220,63 +220,44 @@ function RecruiterPage() {
 
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
+  e.preventDefault();
 
-        // Validate required fields
-        let missing = {};
-        let firstMissingRef = null;
+  // ... your validation logic here ...
 
-        // Check company and placement fields
-        for (const field of requiredFields) {
-            let value;
-            if (field.section === 'companyDetails') {
-                value = companyDetails[field.name];
-            } else {
-                value = getValueByPath(formData, field.name);
-            }
-            if (!value || (typeof value === 'string' && value.trim() === '')) {
-                missing[field.name] = true;
-                if (!firstMissingRef) firstMissingRef = requiredRefs[field.name];
-            }
-        }
+  try {
+    // Save everything under loggedInUser
+    const recruiterRef = firebase.database().ref(`Recruiters/${loggedInUser}`);
 
-        // Check internship fields if enabled
-        if (isInternshipEnabled) {
-            for (const field of internshipRequiredFields) {
-                let value = getValueByPath(formData, field.name);
-                if (!value || (typeof value === 'string' && value.trim() === '')) {
-                    missing[field.name] = true;
-                    if (!firstMissingRef) firstMissingRef = requiredRefs[field.name];
-                }
-            }
-        }
+    await recruiterRef.set({
+      company_name: companyDetails.company_name,
+      industry_sector: companyDetails.industry_sector,
+      company_overview: companyDetails.company_overview,
+      website: companyDetails.website,
+      locations: companyDetails.locations,
+      companyContact: companyDetails.companyContact,
+      alternateContact: companyDetails.alternateContact,
 
-        setMissingFields(missing);
+      placement: {
+        ...formData.placement,
+      },
 
-        if (Object.keys(missing).length > 0) {
-            // Scroll to first missing field
-            if (firstMissingRef && firstMissingRef.current) {
-                firstMissingRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                firstMissingRef.current.focus();
-            }
-            return;
-        }
+      // Save internship only if enabled
+      ...(isInternshipEnabled && {
+        internship: {
+          ...formData.internship,
+        },
+      }),
 
-        try {
-            // Save company details first
-            const companyRef = firebase.database().ref(`companies/${companyDetails.company_name}`);
-            await companyRef.set(companyDetails);
+      postRecruitmentStatus: true,
+    });
 
-            // Save job/internship details
-            const jobRef = firebase.database().ref(`jobs/${formData.company_name}`);
-            await jobRef.set(formData);
+    alert("Details submitted successfully!");
+  } catch (error) {
+    console.error("Error submitting details:", error);
+    alert("Failed to submit details. Please try again.");
+  }
+};
 
-            alert('Details submitted successfully!');
-        } catch (error) {
-            console.error('Error submitting details:', error);
-            alert('Failed to submit details. Please try again.');
-        }
-    };
 
     return (
         <div>

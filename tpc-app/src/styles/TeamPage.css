@@ -42,7 +42,7 @@
 .nav-links:active {
   transform: scale(0.95);
 }
-/* 
+
 .card-container {
   margin: 100px 20px 20px;
 }
@@ -211,9 +211,9 @@
   justify-content: center;
   gap: 30px;
   margin-top: 40px;
-} */
+}
 
-
+/* 
 .teamContainer {
   width: 100vw;
   min-height: 100vh;
@@ -268,8 +268,5 @@
 }
 
 .head-card .team-card {
-  /* border: 2px solid #003049; */
   transform:  scale(1.05);
-  /* box-shadow: 0px 4px 12px rgba(0, 0  , 0, 0.2);
-  background: linear-gradient(135deg, #00304915, #669bbc15); */
-}
+} */

@@ -8,12 +8,21 @@
     gap: 20px;
   }
   
+  .events-card {
+    background: #ffffff;
+    padding: 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    width: 290px;
+    transition: 0.3s;
+  }
+
   .event-card {
     background: #f4f4f4;
     padding: 15px;
     border-radius: 8px;
     cursor: pointer;
-    width: 250px;
+    /* width: 250px; */
     transition: 0.3s;
   }
   

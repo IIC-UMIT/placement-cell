@@ -96,19 +96,14 @@ const StudentDetails = () => {
 
   return (
     <div className="Manage-Student-Container">
-      <h1>Manage Students</h1>
-
-      <div className="search-container">
-        <input
+      <h3>Manage Students</h3>
+      <div className="filter-container">
+      <input
           type="text"
           placeholder="Search by Name"
           value={searchName}
           onChange={(e) => setSearchName(e.target.value)}
         />
-      </div>
-
-      <div className="filter-container">
-        <h3>Filter Students</h3>
         <label>
           Year:
           <select onChange={(e) => setYearFilter(e.target.value)}>
@@ -134,7 +129,6 @@ const StudentDetails = () => {
         </label>
       </div>
 
-      <h3>Student Data</h3>
       <table>
         <thead>
           <tr>
