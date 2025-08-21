@@ -3,7 +3,7 @@ import firebase from "firebase/compat/app";
 import "firebase/compat/database";
 import "firebase/compat/storage";
 import axios from "axios";
-import "../styles/EventDashboard.css"; // Add styling for modal
+import "../styles/TPOEvent.css"; // Add styling for modal
 
 const EventDashboard = () => {
   const [events, setEvents] = useState([]);
@@ -108,32 +108,62 @@ const EventDashboard = () => {
   //   }
   // };
 
-  const handleCreateEvent = async () => {
-    if (!newEvent.name || !newEvent.date || !newEvent.time || !newEvent.venue || !newEvent.speaker) {
-      alert("Please fill all fields");
-      return;
-    }
-    const eventId = `${newEvent.date.replace(/-/g, "")}_${newEvent.time.replace(/:/g, "")}`;
+const handleCreateEvent = async () => {
+  if (!newEvent.name || !newEvent.date || !newEvent.time || !newEvent.venue || !newEvent.speaker || !newEvent.inviteFile) {
+    alert("Please fill all fields and upload an invite image");
+    return;
+  }
+
+  const eventId = `${newEvent.date.replace(/-/g, "")}_${newEvent.time.replace(/:/g, "")}`;
+  const storageRef = firebase.storage().ref(`Events/${eventId}/invite_${Date.now()}.jpg`);
+
+  try {
+    // Upload invite image
+    await storageRef.put(newEvent.inviteFile);
+    const inviteUrl = await storageRef.getDownloadURL();
+
+    // Save event details in DB
     await firebase.database().ref(`Events/${eventId}`).set({
       ...newEvent,
+      eventImage: inviteUrl, // ✅ Store invite image URL
       createdOn: new Date().toLocaleString(),
     });
+
     alert("Event created successfully!");
     setNewEvent({ name: "", description: "", date: "", time: "", venue: "", speaker: "", createdBy: "Admin" });
-  };
+  } catch (error) {
+    console.error("Error creating event:", error);
+    alert("Failed to create event!");
+  }
+};
+;
 
   return (
     <div className="admin-tpo-container">
       <h2>Create New Event</h2>
+
       <div className="event-form">
         <input type="text" placeholder="Event Name" value={newEvent.name} onChange={(e) => setNewEvent({ ...newEvent, name: e.target.value })} />
         <input type="text" placeholder="Description" value={newEvent.description} onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })} />
-        <input type="date" value={newEvent.date} onChange={(e) => setNewEvent({ ...newEvent, date: e.target.value })} />
-        <input type="time" value={newEvent.time} onChange={(e) => setNewEvent({ ...newEvent, time: e.target.value })} />
-        <input type="text" placeholder="Venue" value={newEvent.venue} onChange={(e) => setNewEvent({ ...newEvent, venue: e.target.value })} />
-        <input type="text" placeholder="Speaker" value={newEvent.speaker} onChange={(e) => setNewEvent({ ...newEvent, speaker: e.target.value })} />
-        <input type="text" placeholder="Event Image URL" value={newEvent.eventImage} onChange={(e) => setNewEvent({ ...newEvent, eventImage: e.target.value })} />
-        <input type="text" placeholder="Speaker Image URL" value={newEvent.speakerImage} onChange={(e) => setNewEvent({ ...newEvent, speakerImage: e.target.value })} />
+
+        {/* Date + Time same row */}
+        <div className="form-row">
+          <input type="date" value={newEvent.date} onChange={(e) => setNewEvent({ ...newEvent, date: e.target.value })} />
+          <input type="time" value={newEvent.time} onChange={(e) => setNewEvent({ ...newEvent, time: e.target.value })} />
+        </div>
+
+        {/* Venue + Speaker same row */}
+        <div className="form-row">
+          <input type="text" placeholder="Venue" value={newEvent.venue} onChange={(e) => setNewEvent({ ...newEvent, venue: e.target.value })} />
+          <input type="text" placeholder="Speaker" value={newEvent.speaker} onChange={(e) => setNewEvent({ ...newEvent, speaker: e.target.value })} />
+        </div>
+
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => setNewEvent({ ...newEvent, inviteFile: e.target.files[0] })}
+        />
+
         <button onClick={handleCreateEvent}>Create Event</button>
       </div>
 
@@ -146,7 +176,7 @@ const EventDashboard = () => {
             <p>{event.date} at {event.time}</p>
             <p><strong>Venue:</strong> {event.venue}</p>
             <div className="speaker-info">
-              {event.speakerImage && <img src={event.speakerImage} alt={event.speaker} className="speaker-image" />}
+              {/* {event.speakerImage && <img src={event.speakerImage} alt={event.speaker} className="speaker-image" />} */}
               <p><strong>Speaker:</strong> {event.speaker}</p>
             </div>
           </div>
@@ -155,26 +185,31 @@ const EventDashboard = () => {
 
       {selectedEvent && (
         <div className="event-popup">
-          <h2>{selectedEvent.name}</h2>
-          <p><strong>Date:</strong> {selectedEvent.date} at {selectedEvent.time}</p>
-          <p><strong>Venue:</strong> {selectedEvent.venue}</p>
-          <p><strong>Speaker:</strong> {selectedEvent.speaker}</p>
-          <p><strong>Report:</strong> {selectedEvent.report || "No report available"}</p>
-          <button onClick={() => setEditMode(true)}>Edit Event</button>
-          <button onClick={() => setEditMode(false)}>Add Report & Images</button>
-          <button onClick={() => setSelectedEvent(null)}>Close</button>
-          {editMode ? (
-            <div className="edit-section">
-              <input type="text" value={selectedEvent.name} onChange={(e) => setSelectedEvent({ ...selectedEvent, name: e.target.value })} />
-              <button onClick={handleUpdateEvent}>Save Changes</button>
-            </div>
-          ) : (
-            <div className="report-section">
-              <textarea value={report} onChange={(e) => setReport(e.target.value)} />
-              <input type="file" multiple accept="image/*" onChange={handleFileChange} />
-              <button onClick={handleUpdateEvent} disabled={uploading}>{uploading ? "Uploading..." : "Update Report"}</button>
-            </div>
-          )}
+          <div className="report-section">
+            <h2>{selectedEvent.name}</h2>
+            <>
+              <p><strong>Date:</strong> {selectedEvent.date} at {selectedEvent.time}</p>
+              <p><strong>Venue:</strong> {selectedEvent.venue}</p>
+            </>
+            <p><strong>Speaker:</strong> {selectedEvent.speaker}</p>
+            <p><strong>Report:</strong> {selectedEvent.report || "No report available"}</p>
+            <button onClick={() => setEditMode(true)}>Edit Event</button>
+            <button onClick={() => setEditMode(false)}>Add Report & Images</button>
+
+            {editMode ? (
+              <div className="edit-section">
+                <input type="text" value={selectedEvent.name} onChange={(e) => setSelectedEvent({ ...selectedEvent, name: e.target.value })} />
+                <button onClick={handleUpdateEvent}>Save Changes</button>
+              </div>
+            ) : (
+              <>
+                <textarea value={report} onChange={(e) => setReport(e.target.value)} />
+                <input type="file" multiple accept="image/*" onChange={handleFileChange} />
+                <button onClick={handleUpdateEvent} disabled={uploading}>{uploading ? "Uploading..." : "Update Report"}</button>
+                <button onClick={() => setSelectedEvent(null)}>Close</button>
+              </>
+            )}
+          </div>
         </div>
       )}
     </div>

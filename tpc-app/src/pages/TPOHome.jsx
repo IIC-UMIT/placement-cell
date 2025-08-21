@@ -172,7 +172,6 @@ const TPOHome = () => {
                       <p className="event-info">{event.venue}</p>
                     </div>
                     <div className="event-speaker">
-                      <img src={event.speakerImage || "default-avatar.jpg"} alt="Speaker" />
                       <p>{event.speaker}</p>
                     </div>
                   </div>
