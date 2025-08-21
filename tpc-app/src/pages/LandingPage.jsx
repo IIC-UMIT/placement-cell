@@ -188,6 +188,9 @@ function Home() {
         </div>
 
         {/* STATISTICS */}
+       {/* ================= STATISTICS SECTION ================= */}
+{
+/* STATISTICS */}
         <div className="container-counter">
           <div className="counters">
             <div>
@@ -204,7 +207,7 @@ function Home() {
         <div className="layout">
           <div className="charts-grid">
             <div className="line-chart-container">
-              <h2>CTC Highlight</h2>
+              <h2>Ctc Highlight</h2>
               {/* <Line data={lineData} options={{ scales: { y: { beginAtZero: true } } }} /> */}
               <CtcHighlight />
             </div>
@@ -227,6 +230,9 @@ function Home() {
             <BranchWise />
           </div>
         </div>
+
+
+        
 
         {/* HIGHEST PLACED */}
         <section className="top-students">
