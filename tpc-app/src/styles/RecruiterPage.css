@@ -1,11 +1,57 @@
-/* Form Container */
+
 .recruiter-container {
-  max-width: 1100px; /* Reduce from what appears to be over 1000px currently */
-  margin: 0 auto;
+  max-width: 1180px;        /* Cap width for large monitors */
+  margin: 40px ;        /* Center horizontally */
   padding: 20px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   background-color: #fff;
-  border-radius: 5px;
+  border-radius: 8px;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Small screens (≤480px) */
+@media (max-width: 480px) {
+  .recruiter-container {
+    margin: 10px;
+    padding: 15px;
+    max-width: 100%;       /* Take full width */
+    border-radius: 0;      /* Flat edges for mobile */
+  }
+}
+
+/* Tablets (481px–767px) */
+@media (min-width: 481px) and (max-width: 767px) {
+  .recruiter-container {
+    margin: 20px;
+    padding: 18px;
+    max-width: 95%;
+  }
+}
+
+/* Small laptops (768px–1199px) */
+@media (min-width: 768px) and (max-width: 1199px) {
+  .recruiter-container {
+    margin: 20px;
+    padding: 20px;
+    max-width: 60vw;
+  }
+}
+
+/* Larger laptops/desktops (1200px–1500px) */
+@media (min-width: 1200px) and (max-width: 1500px) {
+  .recruiter-container {
+    margin: 30px;
+    padding: 25px;
+    max-width: 1100px;
+  }
+}
+
+/* Big monitors (≥1700px) */
+@media (min-width: 1700px) {
+  .recruiter-container {
+    max-width: 1600px;     /* Slightly expand but still centered */
+    margin: 50px auto;
+    padding: 30px;
+  }
 }
 
 /* Headings */

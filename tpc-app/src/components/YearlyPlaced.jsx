@@ -13,7 +13,7 @@ ChartJS.register(LineElement, CategoryScale, LinearScale, PointElement, Tooltip,
 
 const YearlyPlaced = () => {
   const data = {
-    labels: ["2019-2020", "2020-2021", "2021-2022", "2022-2023", "2023-2024"],
+    labels: ["19-20", "20-21", "21-22", "22-23", "23-24"],
     datasets: [
       {
         label: "Students Placed",

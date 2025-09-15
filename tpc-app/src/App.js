@@ -15,15 +15,18 @@ import RecruiterHome from './pages/RecruiterHome.jsx';
 import RecruiterDashboard from './pages/RecruiterDashboard.jsx';
 import RecruiterPage from './pages/RecruiterPage.jsx';
 import RecruiterJDManager from './pages/RecruiterJDManager.jsx';
+import RecruiterEditJD from './pages/RecruiterEditJD.jsx';
 // import RecruiterProfile from './pages/RecruiterProfile.jsx';
 import StudentApplied from './pages/StudentApplied.jsx';
 
 import StudentHome from './pages/StudentHome.jsx';
 import StudentDashboard from './pages/StudentDashboard.jsx';
 import StudentProfile from './pages/StudentProfile.jsx';
-// import Resume from './pages/Resume.jsx';
+import Resume from './pages/StudentResume.jsx';
 import Resources from './pages/StudentResources.jsx';
-import JobPosting from './pages/StudentJobPosting.jsx'
+import  MockTests from './pages/StudentMockTests.jsx';
+import JobPosting from './pages/StudentJobPosting.jsx';
+import ApplicationStatus from './pages/StudentApplicationStatus.jsx';
 import PlacementGuidelines from './pages/PlacementGuidelines.jsx';
 
 import TPOHome from './pages/TPOHome.jsx';
@@ -31,7 +34,7 @@ import TPODashboard from './pages/TPODashboard.jsx';
 import Blog from './pages/TPOBlog.jsx'
 import ManageStudents  from './pages/TPOManageStudent.jsx';
 import ManageRecruiters from './pages/TPOManageRecruiter.jsx';
-import ManageUsers from './pages/TPOManageUsers.jsx'
+import ManageUsers from './pages/TPOManageUsers.jsx';
 import Announcements from './pages/TPOAnnouncements.jsx'
 import EventDashboard from './pages/TPOEvent.jsx';
 
@@ -102,11 +105,13 @@ const App = () => {
               <Navigate to="/Login" />
             )
           }>
-          <Route path="Dashboard" element={<StudentHome role={role} userData={userData} />} />
+          <Route path="Dashboard" element={<StudentHome role={role} loggedInUser={loggedInUser} />} />
           <Route path="Profile" element={<StudentProfile role={role} loggedInUser={loggedInUser}/>} />
-          {/* <Route path="Resume" element={<Resume role={role} />} /> */}
-          <Route path="Resources" element={<Resources role={role} />} />
+          <Route path="Resume" element={<Resume role={role} loggedInUser={loggedInUser}  />} />
+          <Route path="Blogs" element={<Resources role={role} />} />
           <Route path="JobPosting" element={<JobPosting role={role} />} />
+          <Route path="MockTests" element={<MockTests role={role} loggedInUser={loggedInUser}/>} />
+          <Route path="ApplicationStatus" element={<ApplicationStatus role={role} loggedInUser={loggedInUser} />} />
           <Route path="EventDashboard" element={<EventDashboard role={role} />} />
           <Route path="PlacementGuidelines" element={<PlacementGuidelines role={role} />} /> 
         </Route>
@@ -121,6 +126,7 @@ const App = () => {
             )
           }
         >
+          <Route path="EditJD/:jd_id" element={<RecruiterEditJD />} />
           <Route path="Dashboard" element={<RecruiterHome role={role} userData={userData} />} />
           <Route path="JobDescription" element={<RecruiterPage role={role} loggedInUser={loggedInUser}  />} />
           <Route path="RecruiterJDManager" element={<RecruiterJDManager role={role} />} />

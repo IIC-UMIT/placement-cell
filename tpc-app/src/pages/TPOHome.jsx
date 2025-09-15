@@ -29,76 +29,65 @@ const TPOHome = () => {
     return `${differenceInDays} days ago`;
   };
 
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const studentsRef = firebase.database().ref("students");
+  //       const recruitersRef = firebase.database().ref("recruiters");
+  //       const placedRef = firebase.database().ref("placed");
+  //       const interviewsRef = firebase.database().ref("interviews");
+
+  //       const [studentsSnapshot, recruitersSnapshot, placedSnapshot, interviewsSnapshot] = await Promise.all([
+  //         studentsRef.once("value"),
+  //         recruitersRef.once("value"),
+  //         placedRef.once("value"),
+  //         interviewsRef.once("value"),
+  //       ]);
+
+  //       const totalStudents = studentsSnapshot.numChildren();
+  //       const totalRecruiters = recruitersSnapshot.numChildren();
+  //       const totalPlaced = placedSnapshot.numChildren();
+  //       const totalNotPlaced = totalStudents - totalPlaced;
+  //       const companies = Object.values(recruitersSnapshot.val() || {});
+  //       const interviewDates = Object.values(interviewsSnapshot.val() || {});
+
+  //       setStats({
+  //         totalStudents,
+  //         totalRecruiters,
+  //         totalPlaced,
+  //         totalNotPlaced,
+  //         companies,
+  //         interviewDates,
+  //       });
+  //     } catch (error) {
+  //       console.error("Error fetching data: ", error);
+  //     }
+  //   };
+
+  //   fetchData();
+  // }, []);
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const studentsRef = firebase.database().ref("students");
-        const recruitersRef = firebase.database().ref("recruiters");
-        const placedRef = firebase.database().ref("placed");
-        const interviewsRef = firebase.database().ref("interviews");
-
-        const [studentsSnapshot, recruitersSnapshot, placedSnapshot, interviewsSnapshot] = await Promise.all([
-          studentsRef.once("value"),
-          recruitersRef.once("value"),
-          placedRef.once("value"),
-          interviewsRef.once("value"),
-        ]);
-
-        const totalStudents = studentsSnapshot.numChildren();
-        const totalRecruiters = recruitersSnapshot.numChildren();
-        const totalPlaced = placedSnapshot.numChildren();
-        const totalNotPlaced = totalStudents - totalPlaced;
-        const companies = Object.values(recruitersSnapshot.val() || {});
-        const interviewDates = Object.values(interviewsSnapshot.val() || {});
-
-        setStats({
-          totalStudents,
-          totalRecruiters,
-          totalPlaced,
-          totalNotPlaced,
-          companies,
-          interviewDates,
-        });
-      } catch (error) {
-        console.error("Error fetching data: ", error);
+    const announcementsRef = firebase.database().ref("Announcements");
+    const onData = (snapshot) => {
+      const data = snapshot.val();
+      console.log("Raw Announcements Data:", data);
+      if (data) {
+        // Map all objects, regardless of missing properties
+        const fetched = Object.values(data || {}).map((item) => ({
+          text: item.announcementText || "",
+          author: item.author || "IIC Co-ordinator Dr. Vilas Kharat",
+          createdOn: item.createdOn || "",
+          avatar: item.avatar || vilasKharat,
+        }));
+        console.log("Fetched announcements:", fetched);
+        setAnnouncements(fetched.filter(a => a.text.trim() !== ""));
+      } else {
+        setAnnouncements([]);
       }
     };
-
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    const fetchAnnouncements = async () => {
-      try {
-        const announcementsRef = firebase.database().ref("Announcements");
-
-        announcementsRef.on("value", (snapshot) => {
-          if (snapshot.exists()) {
-            const data = snapshot.val();
-            const fetchedAnnouncements = Object.values(data)
-              .map((item) => ({
-                text: item.announcementText,
-                author: item.author || "IIC Co-ordinator Dr. Vilas Kharat",
-                createdOn: item.createdOn || new Date().toString(),
-                timestamp: new Date(item.createdOn).getTime(), // Convert to timestamp
-                avatar: item.avatar || vilasKharat,
-              }))
-              .filter((a) => a.text.trim() !== "")
-              .sort((a, b) => b.timestamp - a.timestamp); // Sort by timestamp DESC
-
-            setAnnouncements(fetchedAnnouncements);
-          } else {
-            setAnnouncements([]);
-          }
-        });
-
-        return () => announcementsRef.off();
-      } catch (error) {
-        console.error("Error fetching announcements: ", error);
-      }
-    };
-
-    fetchAnnouncements();
+    announcementsRef.on("value", onData);
+    return () => announcementsRef.off("value", onData);
   }, []);
 
   useEffect(() => {
@@ -204,23 +193,23 @@ const TPOHome = () => {
             <h5>{announcements.length} Announcements</h5>
 
             <div className="announcement-list">
-              {announcements.length > 0 ? (
-                announcements.map((announcement, index) => (
-                  <div key={index} className="announcement">
-                    <div className="profile">
-                      <img src={announcement.avatar} alt="Profile" />
-                      <div>
-                        <p className="mb-0">{announcement.text}</p>
-                        <small>{announcement.author}</small>
-                      </div>
+            {announcements.length > 0 ? (
+              announcements.map((announcement, index) => (
+                <div key={index} className="announcement">
+                  <div className="profile">
+                    <img src={announcement.avatar} alt="Profile" />
+                    <div>
+                      <p className="mb-0">{announcement.text}</p>
+                      <small>{announcement.author}</small>
                     </div>
-                    <div className="timestamp">{getTimeAgo(announcement.createdOn)}</div>
                   </div>
-                ))
-              ) : (
-                <p>No announcements available.</p>
-              )}
-            </div>
+                  <div className="timestamp">{getTimeAgo(announcement.createdOn)}</div>
+                </div>
+              ))
+            ) : (
+              <p>No announcements available.</p>
+            )}
+          </div>
           </div>
 
           {/* <div className="interview-dates-card">

@@ -61,57 +61,57 @@ const StudentDashboard = () => {
                     className="navbarLogo"
                     onClick={() => handleNavigation("/")}
                 /> */}
-                        <div
-                            className={sideBar ? "sidebar sidebarOpen" : "sidebar sidebarClosed"}
-                        >
-                            <h3>Student Dashboard</h3>
-                            <div className="flex flex-col space-y-4">
-                                <button
-                                    className="sidebarButton"
-                                    onClick={() => handleNavigation("/Student/Dashboard")}
-                                >
-                                    Home
-                                </button>
-                                <button
-                                    className="sidebarButton"
-                                    onClick={() => handleNavigation("/Student/Profile")}
-                                >
-                                    Profile
-                                </button>
-                                {/* <button
-                            className="sidebarButton"
-                            onClick={() => handleNavigation("/Student/Resume")}
-                        >
-                           Resume
-                        </button> */}
-                                <button
-                                    className="sidebarButton"
-                                    onClick={() => handleNavigation("/Student/Resources")}
-                                >
-                                    Resources
-                                </button>
-                                <button
-                                    className="sidebarButton"
-                                    onClick={() => handleNavigation("/Student/JobPosting")}
-                                >
-                                    Job Posting
-                                </button>
-                                {/* <button
-                            className="sidebarButton"
-                            onClick={() => handleNavigation("/Student/Profile")}
-                        >
-                            Announcements
-                        </button>
-                        <button
-                            className="sidebarButton"
-                            onClick={() => handleNavigation("/Student/Profile")}
-                        >
-                            Event Dashboard
-                        </button> */}
-                                <button className="sidebarButton" onClick={handleLogout}>
-                                    Sign Out
-                                </button>
-                            </div>
+                    <div
+                        className={sideBar ? "sidebar sidebarOpen" : "sidebar sidebarClosed"}
+                    >
+                        <h3>Student Dashboard</h3>
+                        <div className="flex flex-col space-y-4">
+                            <button
+                                className="sidebarButton"
+                                onClick={() => handleNavigation("/Student/Dashboard")}
+                            >
+                                Home
+                            </button>
+                            <button
+                                className="sidebarButton"
+                                onClick={() => handleNavigation("/Student/Profile")}
+                            >
+                                Profile
+                            </button>
+                            <button
+                                className="sidebarButton"
+                                onClick={() => handleNavigation("/Student/Resume")}
+                            >
+                                Resume
+                            </button>
+                            <button
+                                className="sidebarButton"
+                                onClick={() => handleNavigation("/Student/Blogs")}
+                            >
+                                Blogs
+                            </button>
+                            <button
+                                className="sidebarButton"
+                                onClick={() => handleNavigation("/Student/JobPosting")}
+                            >
+                                Job Posting
+                            </button>
+                            <button
+                                className="sidebarButton"
+                                onClick={() => handleNavigation("/Student/ApplicationStatus")}
+                            >
+                                Application Status
+                            </button>
+                            <button
+                                className="sidebarButton"
+                                onClick={() => handleNavigation("/Student/MockTests")}
+                            >
+                                Mock Tests
+                            </button>
+                            <button className="sidebarButton" onClick={handleLogout}>
+                                Sign Out
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <div className="outletContainer">

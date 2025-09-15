@@ -211,7 +211,7 @@ function Home() {
               {/* <Line data={lineData} options={{ scales: { y: { beginAtZero: true } } }} /> */}
               <CtcHighlight />
             </div>
-            <div className="barlayout flex flex-direction row mt-3" style={{ gap: "20px" }}>
+            <div className="barlayout flex flex-direction mt-3" style={{ gap: "20px" }}>
               <div className="chart-container">
               <h2>Internship Offers</h2>
               <InternshipStatistics />

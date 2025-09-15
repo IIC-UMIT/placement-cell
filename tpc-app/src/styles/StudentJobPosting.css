@@ -1,0 +1,285 @@
+.student-job-posting-container {
+  padding: 30px 40px 50px 40px;
+  background: #f9fafb;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.student-job-posting-container h2 {
+  font-weight: 600;
+  margin-bottom: 24px;
+  color: #202326;
+  text-align: left;
+}
+
+.job-listings {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  justify-content: flex-start;
+}
+
+.job-card {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 3px 18px rgba(90,128,220,.07), 0 1.5px 6px rgba(26,26,26,0.07);
+  position: relative;
+  min-width: 350px;
+  max-width: 370px;
+  padding: 26px 22px 20px 22px;
+  /* margin-bottom: 25px; */
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow 0.23s;
+  border: 1.5px solid #ecedf2;
+}
+
+.job-card:hover {
+  box-shadow: 0 6px 28px rgba(33,64,122,.14), 0 2px 8px rgba(26,26,26,0.10);
+}
+
+.company-logo {
+  position: absolute;
+  top: 23px;
+  right: 22px;
+  width: 54px;
+  height: 54px;
+  object-fit: contain;
+  background: #f5f6fa;
+  border-radius: 10px;
+  border: 1.5px solid #ecedf2;
+  box-shadow: 0 1.5px 6px rgba(43,73,136,0.06);
+}
+
+.job-card h3 {
+  margin-top: 0;
+  margin-bottom: 2px;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #003049;
+  letter-spacing: .2px;
+}
+
+.job-card p {
+  margin: 2.5px 0 0 0;
+  color: #47597a;
+  font-size: 0.99rem;
+  line-height: 1.5;
+}
+
+.job-card b {
+  color: #003049;
+  font-weight: 500;
+}
+
+.job-card button {
+  color: #fff;
+  background: #003049;
+  border: none;
+  border-radius: 6px;
+  margin: 12px 10px 0 0;
+  padding: 9px 18px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.22s;
+}
+
+.job-card button:hover {
+  background: #002438;
+}
+
+/* Modal overlay background */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 180px; /* use 0 so overlay is full width */
+  width: 100vw;
+  height: 100vh;
+  z-index: 1001;
+  background: rgba(60, 68, 85, 0.33);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(2px);
+  /* Allow overlay to scroll if modal is taller than viewport */
+  overflow-y: auto;
+}
+
+/* Modal itself: scroll content if necessary */
+.job-details-modal {
+  position: relative;
+  z-index: 1002;
+  background: #fff;
+  max-width: 900px;
+  width: 96vw;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(96, 96, 105, 0.23);
+  padding: 36px 35px 24px 35px;
+  max-height: 94vh;            /* restrict height of modal */
+  overflow-y: auto;            /* allow modal's content to scroll */
+  overscroll-behavior: contain;/* optional: prevent modal scroll from bleeding to body */
+}
+
+@media (max-width:800px){
+  .job-details-modal { max-width: 98vw; padding: 23px 6vw; }
+}
+
+.job-details-modal h2 {
+  margin-top: 0;
+  font-size: 1.32rem;
+  color: #003049;
+  font-weight: 700;
+  margin-bottom: 13px;
+}
+.job-details-modal h3 {
+  margin-top: 29px;
+  margin-bottom: 9px;
+  font-size: 1.04rem;
+  color: #003049;
+  font-weight: 600;
+  letter-spacing: .3px;
+}
+.job-details-modal p, .job-details-modal ul {
+  margin-bottom: 5px;
+  margin-top: 4px;
+}
+
+.job-details-modal ul {
+  padding-left: 19px;
+  margin-bottom: 12px;
+}
+
+.job-details-modal button {
+  background: #e3e9fd;
+  color: #003049;
+  border: none;
+  border-radius: 6px;
+  padding: 7px 16px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.97rem;
+  transition: background 0.18s;
+  border: 1.5px solid #c8d1f2;
+}
+.job-details-modal button:hover {
+  background: #002438;
+}
+
+.jd-files-section {
+  margin-top: 22px;
+  padding-top: 13px;
+  border-top: 1.5px solid #e2e7ec;
+  background: #f9fafb;
+  border-radius: 0 0 12px 12px;
+}
+
+.jd-files-section h4 {
+  margin: 0 0 10px 0;
+  color: #003049;
+  font-weight: 600;
+  font-size: 1.01rem;
+}
+
+.jd-files-section ul {
+  list-style-type: disc;
+  margin-left: 16px;
+}
+
+.jd-files-section li {
+  margin-bottom: 5px;
+}
+
+.jd-files-section a {
+  color: #003049;
+  font-weight: 500;
+  text-decoration: underline;
+}
+
+.jd-files-section a:hover {
+  color: #003049;
+  text-decoration: underline;
+}
+
+/* Tag/badge styles */
+
+.job-badge, .job-badge-blue, .job-badge-yellow {
+  display: inline-block;
+  border-radius: 9px;
+  font-size: 0.95em;
+  padding: 3.5px 12px;
+  font-weight: 600;
+  margin-right: 7px;
+}
+
+.job-badge { background: #f1f3f7; color: #525862; }
+.job-badge-blue { background: #e5eeff; color: #3675d1; border: 1px solid #cde1fa; }
+.job-badge-yellow{ background: #fff6cd; color: #c18d05; border: 1px solid #ffe388; }
+
+@media (max-width: 950px) {
+  .job-details-modal {
+    max-width: 99vw;
+    padding: 13px 4vw;
+  }
+  .job-listings {
+    gap: 12px;
+  }
+  .job-card {
+    /* min-width: 60vw; */
+    max-width: 95vw;
+    padding: 18px 2vw 16px 19px;
+  }
+}
+
+@media (max-width: 600px) {
+  .job-details-modal {
+    padding: 3vw 1vw;
+    font-size: 0.92rem;
+    min-width: unset;
+  }
+  .job-card {
+    font-size: 0.92rem;
+    padding-right: 5vw;
+  }
+}
+
+
+/* Modal header with logo and company name */
+.modal-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.modal-logo {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  border-radius: 12px;
+  background: #f5f6fa;
+  border: 1.5px solid #ecedf2;
+  box-shadow: 0 1px 6px rgba(43,73,136,0.06);
+}
+
+/* Apply button container below modal content */
+.modal-apply-btn-container {
+  margin-top: 28px;
+  text-align: center;
+}
+
+.apply-btn {
+  background-color: #003049;
+  color: white;
+  font-weight: 600;
+  font-size: 1.1rem;
+  padding: 14px 32px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.25s ease;
+}
+
+.apply-btn:hover {
+  background-color: #002c43;
+}

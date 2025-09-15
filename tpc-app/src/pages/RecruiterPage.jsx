@@ -3,7 +3,7 @@ import firebase from 'firebase/compat/app';
 import 'firebase/compat/database';
 import '../styles/RecruiterPage.css';
 
-function RecruiterPage({loggedInUser}) {
+function RecruiterPage({ loggedInUser }) {
     const [companyDetails, setCompanyDetails] = useState({
         company_name: '',
         industry_sector: '',
@@ -113,48 +113,6 @@ function RecruiterPage({loggedInUser}) {
 
     const [missingFields, setMissingFields] = useState({});
 
-    // Helper to get value by path
-    const getValueByPath = (obj, path) => {
-        return path.split('.').reduce((acc, part) => acc && acc[part], obj);
-    };
-
-    // List of required fields
-    const requiredFields = [
-        { name: 'company_name', section: 'companyDetails' },
-        { name: 'industry_sector', section: 'companyDetails' },
-        { name: 'company_overview', section: 'companyDetails' },
-        { name: 'website', section: 'companyDetails' },
-        { name: 'companyContact', section: 'companyDetails' },
-        { name: 'placement.job_title', section: 'formData' },
-        { name: 'placement.job_desc', section: 'formData' },
-        { name: 'placement.type_of_employment', section: 'formData' },
-        { name: 'placement.noOfExpectedHires', section: 'formData' },
-        { name: 'placement.jobLocation', section: 'formData' },
-        { name: 'placement.remote_on_site', section: 'formData' },
-        { name: 'placement.eligibility_criteria.required_qualifications', section: 'formData' },
-        { name: 'placement.eligibility_criteria.skill_requirements', section: 'formData' },
-        { name: 'placement.eligibility_criteria.batch_year_of_study', section: 'formData' },
-        { name: 'placement.eligibility_criteria.minimum_cgpa_grade', section: 'formData' },
-        { name: 'placement.ctcAndBreakup.salary', section: 'formData' },
-        { name: 'placement.selection_process.assessment_details', section: 'formData' },
-        { name: 'placement.selection_process.expected_timeline', section: 'formData' },
-    ];
-
-    // Internship required fields
-    const internshipRequiredFields = [
-        { name: 'internship.internship_title', section: 'formData' },
-        { name: 'internship.internship_description', section: 'formData' },
-        { name: 'internship.duration.start_date', section: 'formData' },
-        { name: 'internship.duration.end_date', section: 'formData' },
-        { name: 'internship.type_of_employment', section: 'formData' },
-        { name: 'internship.remote_on_site', section: 'formData' },
-        { name: 'internship.eligibility_criteria.required_qualifications', section: 'formData' },
-        { name: 'internship.eligibility_criteria.skill_requirements', section: 'formData' },
-        { name: 'internship.eligibility_criteria.batch_year_of_study', section: 'formData' },
-        { name: 'internship.eligibility_criteria.minimum_cgpa_grade', section: 'formData' },
-        { name: 'internship.ctcAndBreakup.stipend', section: 'formData' },
-    ];
-
     const handleCompanyChange = (e) => {
         const { name, value } = e.target;
         setCompanyDetails((prevDetails) => ({
@@ -177,7 +135,7 @@ function RecruiterPage({loggedInUser}) {
     //         ...prevData,
     //         [name]: value,
     //     }));
-        
+
     //     if (value && value.trim() !== '') {
     //         setMissingFields((prev) => {
     //             const updated = { ...prev };
@@ -188,75 +146,79 @@ function RecruiterPage({loggedInUser}) {
     // };
 
     const handleFormChange = (e) => {
-  const { name, value } = e.target;
-  const keys = name.split(".");
+        const { name, value } = e.target;
+        const keys = name.split(".");
 
-  setFormData((prevData) => {
-    const updatedData = { ...prevData };
-    let current = updatedData;
+        setFormData((prevData) => {
+            const updatedData = { ...prevData };
+            let current = updatedData;
 
-    for (let i = 0; i < keys.length - 1; i++) {
-      const key = keys[i];
-      if (!(key in current)) {
-        current[key] = {};
-      }
-      current = current[key];
-    }
+            for (let i = 0; i < keys.length - 1; i++) {
+                const key = keys[i];
+                if (!(key in current)) {
+                    current[key] = {};
+                }
+                current = current[key];
+            }
 
-    current[keys[keys.length - 1]] = value;
+            current[keys[keys.length - 1]] = value;
 
-    return updatedData;
-  });
+            return updatedData;
+        });
 
-  // Remove error message for this field if filled
-  if (value && value.trim() !== "") {
-    setMissingFields((prev) => {
-      const updated = { ...prev };
-      delete updated[name];
-      return updated;
-    });
-  }
-};
+        // Remove error message for this field if filled
+        if (value && value.trim() !== "") {
+            setMissingFields((prev) => {
+                const updated = { ...prev };
+                delete updated[name];
+                return updated;
+            });
+        }
+    };
 
 
     const handleSubmit = async (e) => {
-  e.preventDefault();
+        e.preventDefault();
 
-  // ... your validation logic here ...
+        // ... your validation logic here ...
 
-  try {
-    // Save everything under loggedInUser
-    const recruiterRef = firebase.database().ref(`Recruiters/${loggedInUser}`);
+        try {
+            const jdprofile_id = Math.floor(Date.now() / 1000);
 
-    await recruiterRef.set({
-      company_name: companyDetails.company_name,
-      industry_sector: companyDetails.industry_sector,
-      company_overview: companyDetails.company_overview,
-      website: companyDetails.website,
-      locations: companyDetails.locations,
-      companyContact: companyDetails.companyContact,
-      alternateContact: companyDetails.alternateContact,
 
-      placement: {
-        ...formData.placement,
-      },
+            const recruiterRef = firebase
+                .database()
+                .ref(`Recruiters/${loggedInUser}/${jdprofile_id}`);
 
-      // Save internship only if enabled
-      ...(isInternshipEnabled && {
-        internship: {
-          ...formData.internship,
-        },
-      }),
+            await recruiterRef.set({
+                company_name: companyDetails.company_name,
+                industry_sector: companyDetails.industry_sector,
+                company_overview: companyDetails.company_overview,
+                website: companyDetails.website,
+                locations: companyDetails.locations,
+                companyContact: companyDetails.companyContact,
+                alternateContact: companyDetails.alternateContact,
 
-      postRecruitmentStatus: true,
-    });
+                placement: {
+                    ...formData.placement,
+                },
 
-    alert("Details submitted successfully!");
-  } catch (error) {
-    console.error("Error submitting details:", error);
-    alert("Failed to submit details. Please try again.");
-  }
-};
+                // Save internship only if enabled
+                ...(isInternshipEnabled && {
+                    internship: {
+                        ...formData.internship,
+                    },
+                }),
+
+                postRecruitmentStatus: true,
+            });
+
+            alert("Details submitted successfully!");
+        } catch (error) {
+            console.error("Error submitting details:", error);
+            alert("Failed to submit details. Please try again.");
+        }
+    };
 
 
     return (
@@ -443,13 +405,13 @@ function RecruiterPage({loggedInUser}) {
                             /> */}
 
                             <input
-  type="number"
-  name="placement.noOfExpectedHires"
-  ref={requiredRefs['placement.noOfExpectedHires']}
-  value={formData.placement.noOfExpectedHires || ''}
-  onChange={handleFormChange}
-  placeholder="Enter expected number of hires"
-/>
+                                type="number"
+                                name="placement.noOfExpectedHires"
+                                ref={requiredRefs['placement.noOfExpectedHires']}
+                                value={formData.placement.noOfExpectedHires || ''}
+                                onChange={handleFormChange}
+                                placeholder="Enter expected number of hires"
+                            />
 
                             {missingFields['placement.noOfExpectedHires'] && (
                                 <div className="required-message">This is a required field</div>
@@ -560,6 +522,23 @@ function RecruiterPage({loggedInUser}) {
                             )}
                         </div>
                         <div className="form-group">
+                            <label htmlFor="placement.eligibility_criteria.minimum_cgpa_grade">
+                                Minimum Percentage
+                                <span className="required-asterisk">*</span>
+                            </label>
+                            <input
+                                type="text"
+                                name="placement.eligibility_criteria.minimum_percentage "
+                                ref={requiredRefs['placement.eligibility_criteria.minimum_percentage ']}
+                                value={formData.placement.eligibility_criteria.minimum_percentage }
+                                onChange={handleFormChange}
+                                placeholder="Enter minimum Percentage"
+                            />
+                            {missingFields['placement.eligibility_criteria.minimum_percentage'] && (
+                                <div className="required-message">This is a required field</div>
+                            )}
+                        </div>
+                        <div className="form-group">
                             <label htmlFor="placement.eligibility_criteria.other_criteria">
                                 Other Criteria
                             </label>
@@ -651,13 +630,13 @@ function RecruiterPage({loggedInUser}) {
                             )}
                         </div>
 
-                        <div className="form-group" style={{ display: 'flex', gap: '0.5rem' , flexDirection: 'row'}}>
+                        <div className="form-group" style={{ display: 'flex', gap: '0.5rem', flexDirection: 'row' }}>
                             <input
                                 type="checkbox"
                                 id="include-internship"
                                 checked={isInternshipEnabled}
                                 onChange={() => setIsInternshipEnabled(!isInternshipEnabled)}
-                                style={{ width: '18px'}}
+                                style={{ width: '18px' }}
                             />
                             <label htmlFor="include-internship" style={{ margin: 0, fontWeight: 600, fontSize: '1.2rem' }}>
                                 Include Internship Details?

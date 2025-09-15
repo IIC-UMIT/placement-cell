@@ -40,7 +40,7 @@ const CompanyWise = () => {
 
   return (
     <div className="chart">
-      <div className="chart-wrapper">
+      <div className="chart-wrapper" style={{ width: "450px", height: "650px" }}>
         <Doughnut data={data} options={options} />
         <div className="chart-center">
           <span className="percentage"></span>

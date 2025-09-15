@@ -34,7 +34,7 @@
 }
 
 /* Upcoming Events Section */
-.events-section {
+.homesection {
     background: white;
     width: 860px;
     border-radius: 15px;
@@ -42,7 +42,7 @@
     box-shadow: 0px 10px 10px rgba(0, 0, 0, 0.1);
 }
 
-.events-section .section-title {
+.homesection .section-title {
     font-weight: bold;
     color: #003049;
     margin-bottom: 10px;

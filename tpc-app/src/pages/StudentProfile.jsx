@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import firebase from 'firebase/compat/app';
+import 'firebase/compat/database';
 import '../styles/StudentProfile.css';
 
 const months = [
@@ -8,8 +9,9 @@ const months = [
 ];
 const years = Array.from({ length: 10 }, (_, i) => new Date().getFullYear() + i);
 
+// ---------------- Utility Functions ----------------
 const getAcademicYear = (graduationYear) => {
-  const currentMonth = new Date().getMonth() + 1; // Month is zero-indexed
+  const currentMonth = new Date().getMonth() + 1;
   const currentYear = new Date().getFullYear();
 
   if (graduationYear === currentYear + 1) return currentMonth >= 7 ? '4th' : '3rd';
@@ -20,6 +22,49 @@ const getAcademicYear = (graduationYear) => {
   return '';
 };
 
+const getCompletedSemesters = (gradYear) => {
+  const today = new Date();
+  const currentYear = today.getFullYear();
+  const currentMonth = today.getMonth() + 1;
+  if (!gradYear) return 0;
+
+  const academicStartYear = gradYear - 4;
+  const yearsPassed = currentYear - academicStartYear;
+
+  if (yearsPassed < 0) return 0;
+  if (yearsPassed >= 4) return 8;
+
+  let completedSems = yearsPassed * 2;
+  if (currentMonth >= 7) completedSems += 1;
+
+  return Math.min(completedSems, 8);
+};
+
+const calculateAvgCgpa = (sgpaArray, gradYear) => {
+  const completedSems = getCompletedSemesters(gradYear);
+  const validScores = sgpaArray
+    .slice(0, completedSems)
+    .filter(s => s !== '' && !isNaN(s))
+    .map(Number);
+
+  if (validScores.length === 0) return '';
+  const sum = validScores.reduce((acc, val) => acc + val, 0);
+  return (sum / validScores.length).toFixed(2);
+};
+
+const calculateAvgPercentage = (percentageArray, gradYear) => {
+  const completedSems = getCompletedSemesters(gradYear);
+  const validScores = percentageArray
+    .slice(0, completedSems)
+    .filter(p => p !== '' && !isNaN(p))
+    .map(Number);
+
+  if (validScores.length === 0) return '';
+  const sum = validScores.reduce((acc, val) => acc + val, 0);
+  return (sum / validScores.length).toFixed(2);
+};
+
+// ---------------- Main Component ----------------
 function StudentProfile({ loggedInUser }) {
   const [studentData, setStudentData] = useState({
     name: '',
@@ -37,17 +82,17 @@ function StudentProfile({ loggedInUser }) {
     year: '',
     skills: '',
     languages: '',
-    certifications: '',
-    technicalSkills: '',
+    certifications: [],
+    technicalSkills: [],
     cgpa: '',
-    sgpa: Array(6).fill(''),
-    percentage: Array(6).fill(''),
-    avgCgpa: '',
+    sgpa: Array(8).fill(''),
+    percentage: Array(8).fill(''),
     avgPercent: '',
     experiences: [],
     projects: [],
     certificates: [],
     resume: null,
+    photo: null,
     githubLink: '',
     linkedinLink: '',
     backlog: 'No',
@@ -65,16 +110,58 @@ function StudentProfile({ loggedInUser }) {
     diplomaDegree: '',
     description: '',
   });
+
+  const [formSubmitted, setFormSubmitted] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [certInput, setCertInput] = useState('');
   const [techInput, setTechInput] = useState('');
 
+  // Fetch student profile
+  useEffect(() => {
+    const fetchUserMeta = async () => {
+      try {
+        const metaSnapshot = await firebase.database().ref(`users/Students${loggedInUser}`).get();
+        if (metaSnapshot.exists()) {
+          const { graduationYear, branch } = metaSnapshot.val();
+          if (graduationYear && branch) {
+            const profilePath = `Students/${graduationYear}/${branch}/${loggedInUser}`;
+            const profileSnapshot = await firebase.database().ref(profilePath).get();
+            if (profileSnapshot.exists()) {
+              setStudentData(profileSnapshot.val());
+              setFormSubmitted(true);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching user meta or profile:', error);
+      }
+    };
+    if (loggedInUser) fetchUserMeta();
+  }, [loggedInUser]);
+
+  // Auto-update academic year
   useEffect(() => {
     const year = getAcademicYear(studentData.graduationYear);
     setStudentData((prevData) => ({ ...prevData, year }));
   }, [studentData.graduationYear]);
 
+  // ---------------- Handlers ----------------
   const handleChange = (event) => {
-    const { name, value, files } = event.target; // removed 'type'
+    const { name, value, files } = event.target;
+
+    if (name === 'resume' || name === 'photo') {
+      if (files && files.length > 0) {
+        const file = files[0];
+        if (file.size > 2 * 1024 * 1024) {
+          alert('File size must be less than 2MB.');
+          event.target.value = '';
+          return;
+        }
+        setStudentData(prev => ({ ...prev, [name]: file }));
+      }
+      return;
+    }
+
     if (name === 'certificates') {
       const newFiles = Array.from(files);
       setStudentData((prevData) => ({
@@ -85,27 +172,23 @@ function StudentProfile({ loggedInUser }) {
       const idx = parseInt(name.replace('sgpa', '')) - 1;
       const updatedSgpa = [...studentData.sgpa];
       updatedSgpa[idx] = value;
-      setStudentData((prevData) => ({ ...prevData, sgpa: updatedSgpa }));
+      const avg = calculateAvgCgpa(updatedSgpa, studentData.graduationYear);
+      setStudentData((prevData) => ({ ...prevData, sgpa: updatedSgpa, cgpa: avg }));
     } else if (name.startsWith('percentage')) {
       const idx = parseInt(name.replace('percentage', '')) - 1;
       const updatedPercent = [...studentData.percentage];
       updatedPercent[idx] = value;
-      setStudentData((prevData) => ({ ...prevData, percentage: updatedPercent }));
+      const avgPercent = calculateAvgPercentage(updatedPercent, studentData.graduationYear);
+      setStudentData(prevData => ({ ...prevData, percentage: updatedPercent, avgPercent }));
     } else {
-      setStudentData((prevData) => ({
-        ...prevData,
-        [name]: files ? files[0] : value,
-      }));
+      setStudentData(prevData => ({ ...prevData, [name]: value }));
     }
   };
 
   const handleExperienceChange = (idx, field, value) => {
     const updated = [...studentData.experiences];
     updated[idx][field] = value;
-    setStudentData((prevData) => ({
-      ...prevData,
-      experiences: updated,
-    }));
+    setStudentData((prevData) => ({ ...prevData, experiences: updated }));
   };
 
   const addExperience = () => {
@@ -124,13 +207,12 @@ function StudentProfile({ loggedInUser }) {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
     const dbPath = `Students/${studentData.graduationYear}/${studentData.branch}/${loggedInUser}`;
 
     try {
-      // Assuming firebase is already imported and initialized
       await firebase.database().ref(dbPath).set(studentData);
-      console.log('Student Data:', studentData);
+      setFormSubmitted(true);
+      setIsEditing(false);
       alert('Form submitted successfully!');
     } catch (error) {
       console.error('Error saving data to Firebase:', error);
@@ -138,39 +220,29 @@ function StudentProfile({ loggedInUser }) {
     }
   };
 
-  // Add certification on Enter
+  // Chips
   const handleCertInputKeyDown = (e) => {
     if (e.key === 'Enter' && certInput.trim()) {
       e.preventDefault();
       setStudentData(prev => ({
         ...prev,
-        certifications: prev.certifications
-          ? Array.isArray(prev.certifications)
-            ? [...prev.certifications, certInput.trim()]
-            : [prev.certifications, certInput.trim()]
-          : [certInput.trim()]
+        certifications: [...prev.certifications, certInput.trim()]
       }));
       setCertInput('');
     }
   };
 
-  // Add technical skill on Enter
   const handleTechInputKeyDown = (e) => {
     if (e.key === 'Enter' && techInput.trim()) {
       e.preventDefault();
       setStudentData(prev => ({
         ...prev,
-        technicalSkills: prev.technicalSkills
-          ? Array.isArray(prev.technicalSkills)
-            ? [...prev.technicalSkills, techInput.trim()]
-            : [prev.technicalSkills, techInput.trim()]
-          : [techInput.trim()]
+        technicalSkills: [...prev.technicalSkills, techInput.trim()]
       }));
       setTechInput('');
     }
   };
 
-  // Remove chip helper
   const removeChip = (type, idx) => {
     setStudentData(prev => ({
       ...prev,
@@ -178,16 +250,26 @@ function StudentProfile({ loggedInUser }) {
     }));
   };
 
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+  };
+
+
+  // ---------------- Render ----------------
   return (
     <div className="student-page">
-      <h2>Student Profile</h2>
+      {formSubmitted && !isEditing && (
+        <button onClick={() => setIsEditing(true)} style={{ marginBottom: '1rem' }}>
+          Edit
+        </button>
+      )}
+
+      <h1>{formSubmitted ? (isEditing ? 'Edit Student Profile' : 'Student Profile') : 'Student Profile Form'}</h1>
       <form onSubmit={handleSubmit}>
-        {/* Name */}
         <div className="form-group">
           <label>Name:</label>
           <input type="text" name="name" value={studentData.name} onChange={handleChange} required />
         </div>
-
         {/* PRN and Roll No. in same row */}
         <div className="form-row">
           <div className="form-group">
@@ -199,7 +281,6 @@ function StudentProfile({ loggedInUser }) {
             <input type="text" name="rollNo" value={studentData.rollNo} onChange={handleChange} required />
           </div>
         </div>
-
         {/* Gender, DOB */}
         <div className="form-row">
           <div className="form-group">
@@ -213,7 +294,6 @@ function StudentProfile({ loggedInUser }) {
             <input type="date" name="dob" value={studentData.dob} onChange={handleChange} required />
           </div>
         </div>
-
         {/* Address and Nationality in same row */}
         <div className="form-row">
           <div className="form-group">
@@ -225,7 +305,6 @@ function StudentProfile({ loggedInUser }) {
             <input type="text" name="nationality" value={studentData.nationality} onChange={handleChange} required />
           </div>
         </div>
-
         {/* Email and Phone in same row */}
         <div className="form-row">
           <div className="form-group">
@@ -237,7 +316,6 @@ function StudentProfile({ loggedInUser }) {
             <input type="tel" name="phone" value={studentData.phone} onChange={handleChange} required />
           </div>
         </div>
-
         {/* Branch */}
         <div className="form-group">
           <label>Branch:</label>
@@ -251,7 +329,6 @@ function StudentProfile({ loggedInUser }) {
             <option value="IT">IT (Information Technology)</option>
           </select>
         </div>
-
         {/* Graduation Month and Year in same row */}
         <div className="form-row">
           <div className="form-group">
@@ -269,7 +346,6 @@ function StudentProfile({ loggedInUser }) {
             </select>
           </div>
         </div>
-
         {/* Year of Study */}
         <div className="form-group">
           <label>Year of Study:</label>
@@ -281,7 +357,6 @@ function StudentProfile({ loggedInUser }) {
             <option value="4th">4th</option>
           </select>
         </div>
-
         {/* Class X */}
         <div className="form-row">
           <div className="form-group">
@@ -297,7 +372,6 @@ function StudentProfile({ loggedInUser }) {
             <input type="number" name="classXYear" value={studentData.classXYear} onChange={handleChange} />
           </div>
         </div>
-
         {/* Diploma or Class XII */}
         <div className="form-group">
           <label>Have you completed Diploma?</label>
@@ -337,54 +411,69 @@ function StudentProfile({ loggedInUser }) {
             </div>
           </div>
         )}
-
         {/* SGPA and Percentage for each sem: each in its own row like average CGPA/% */}
-        {[...Array(6)].map((_, idx) => (
-          <div className="form-row" key={idx}>
-            <div className="form-group">
-              <label>{idx + 1} Sem SGPA:</label>
-              <input
-                type="number"
-                name={`sgpa${idx + 1}`}
-                value={studentData.sgpa[idx]}
-                onChange={handleChange}
-                min="0"
-                max="10"
-                style={{ width: '100%' }}
-              />
-            </div>
-            <div className="form-group">
-              <label>{idx + 1} Sem %:</label>
-              <input
-                type="number"
-                name={`percentage${idx + 1}`}
-                value={studentData.percentage[idx]}
-                onChange={handleChange}
-                min="0"
-                max="100"
-                style={{ width: '100%' }}
-              />
+        <div className="form-row">
+          <div className="form-group">
+            <label>SGPA per Semester (8 semesters)</label>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+              {studentData.sgpa.map((val, i) => (
+                <input
+                  key={i}
+                  name={`sgpa${i + 1}`}
+                  placeholder={`Sem ${i + 1}`}
+                  value={val}
+                  onChange={handleChange}
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  max="10"
+                />
+              ))}
             </div>
           </div>
-        ))}
+          <div className="form-group">
+            <label>Percentage per Semester (8 semesters)</label>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+              {studentData.percentage.map((val, i) => (
+                <input
+                  key={i}
+                  name={`percentage${i + 1}`}
+                  placeholder={`Sem ${i + 1}`}
+                  value={val}
+                  onChange={handleChange}
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  max="100"
+                />
+              ))}
+            </div>
+          </div>
+        </div>
         {/* Average CGPA and % in same row */}
         <div className="form-row">
           <div className="form-group">
             <label>Average CGPA:</label>
-            <input type="number" name="avgCgpa" value={studentData.avgCgpa} onChange={handleChange} />
+            <input type="number"
+              step="0.01"
+              min="0"
+              max="10"
+              name="cgpa" value={studentData.cgpa} readOnly />
           </div>
           <div className="form-group">
-            <label>Average %:</label>
-            <input type="number" name="avgPercent" value={studentData.avgPercent} onChange={handleChange} />
+            <label>Average Percentage:</label>
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              max="10"
+              name="avgPercent" value={studentData.avgPercent} readOnly />
           </div>
         </div>
-
         {/* Backlog */}
         <div className="form-group">
           {/* Use htmlFor and unique ids for labels and checkboxes */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-
-
             {/* <input
               id="hasBacklog"
               type="checkbox"
@@ -405,31 +494,27 @@ function StudentProfile({ loggedInUser }) {
                 }
               }}
             /> */}
-
             <input
-  id="hasBacklog"
-  type="checkbox"
-  checked={studentData.backlog === "Yes" || !!studentData.clearedKT}
-  onChange={e => {
-    if (e.target.checked) {
-      setStudentData(prev => ({
-        ...prev,
-        backlog: "Yes",
-      }));
-    } else {
-      setStudentData(prev => ({
-        ...prev,
-        backlog: "No",
-        backlogCount: '',
-        clearedKT: ''
-      }));
-    }
-  }}
-/>
-
-
-
-            <label htmlFor="hasBacklog" style={{ margin: 0, fontWeight: 'bold', cursor: 'pointer', fontSize: '16px'}}>
+              id="hasBacklog"
+              type="checkbox"
+              checked={studentData.backlog === "Yes" || !!studentData.clearedKT}
+              onChange={e => {
+                if (e.target.checked) {
+                  setStudentData(prev => ({
+                    ...prev,
+                    backlog: "Yes",
+                  }));
+                } else {
+                  setStudentData(prev => ({
+                    ...prev,
+                    backlog: "No",
+                    backlogCount: '',
+                    clearedKT: ''
+                  }));
+                }
+              }}
+            />
+            <label htmlFor="hasBacklog" style={{ margin: 0, fontWeight: 'bold', cursor: 'pointer', fontSize: '16px' }}>
               Have you ever had a backlog?
             </label>
           </div>
@@ -472,7 +557,6 @@ function StudentProfile({ loggedInUser }) {
             </div>
           )}
         </div>
-
         {/* Experience */}
         <div className="form-group">
           <div className="form-row" style={{ flexDirection: 'row', gap: '1rem', justifyContent: 'space-between' }}>
@@ -481,7 +565,7 @@ function StudentProfile({ loggedInUser }) {
               type="button"
               onClick={addExperience}
               className="form-submit"
-              style={{ width: '120px'}}
+              style={{ width: '120px' }}
             >
               + Add
             </button>
@@ -509,19 +593,18 @@ function StudentProfile({ loggedInUser }) {
             </div>
           ))}
         </div>
-
         {/* Projects */}
         <div className="form-group">
           <div className='form-row' style={{ flexDirection: 'row', gap: '1rem', justifyContent: 'space-between' }}>
-          <label>Projects:</label>
-          <button
-            type="button"
-            onClick={addProject}
-            className="form-submit"
-            style={{ width: '120px' }}
-          >
-            + Add
-          </button>
+            <label>Projects:</label>
+            <button
+              type="button"
+              onClick={addProject}
+              className="form-submit"
+              style={{ width: '120px' }}
+            >
+              + Add
+            </button>
           </div>
           {studentData.projects.map((project, index) => (
             <div className="form-row" key={index} style={{ flexDirection: 'row', gap: '1rem' }}>
@@ -548,11 +631,22 @@ function StudentProfile({ loggedInUser }) {
             </div>
           ))}
         </div>
-
         {/* Resume */}
         <div className="form-group">
-          <label>Resume Drive Link:</label>
-          <input type="text" name="resume" value={studentData.resume || ''} onChange={handleChange} placeholder="Resume Drive Link" />
+          <label>Upload Resume (Max 2MB, PDF/DOC)</label>
+          <input type="file" name="resume" accept=".pdf,.doc,.docx" onChange={handleChange} />
+          {studentData.resume && <div>{studentData.resume.name}</div>}
+        </div>
+        <div className="form-group">
+          <label>Upload Photo (Max 2MB, Image files)</label>
+          <input type="file" name="photo" accept="image/*" onChange={handleChange} />
+          {studentData.photo && (
+            <img
+              src={URL.createObjectURL(studentData.photo)}
+              alt={studentData.name ? `${studentData.name}'s photo` : ''}
+              style={{ maxWidth: 150, marginTop: 10, borderRadius: 8 }}
+            />
+          )}
         </div>
 
         {/* Certifications with chips */}
@@ -607,7 +701,6 @@ function StudentProfile({ loggedInUser }) {
             </div>
           )}
         </div>
-
         {/* Technical Skills with chips */}
         <div className="form-group">
           <label>Technical Skills:</label>
@@ -660,7 +753,6 @@ function StudentProfile({ loggedInUser }) {
             </div>
           )}
         </div>
-
         {/* LinkedIn and GitHub in same row */}
         <div className="form-row">
           <div className="form-group">
@@ -672,7 +764,6 @@ function StudentProfile({ loggedInUser }) {
             <input type="text" name="linkedinLink" value={studentData.linkedinLink} onChange={handleChange} placeholder="LinkedIn Link" />
           </div>
         </div>
-
         {/* Upload Certificates (Optional) */}
         {/* <div className="form-group">
           <label>Upload Certificates (Optional):</label>
@@ -685,10 +776,21 @@ function StudentProfile({ loggedInUser }) {
             </ul>
           )}
         </div> */}
-
-        <div className="form-submit">
-          <button type="submit">Submit</button>
+        <div className="form-submit" style={{ marginTop: '20px' }}>
+          <button type="submit">
+            {formSubmitted && isEditing ? 'Save Changes' : 'Submit'}
+          </button>
+          {isEditing && (
+            <button
+              type="button"
+              onClick={handleCancelEdit}  // Make sure this function exists in your component
+              style={{ marginLeft: '10px' }}
+            >
+              Cancel
+            </button>
+          )}
         </div>
+
       </form>
     </div>
   );
