@@ -51,7 +51,7 @@ const Signup = () => {
     }
 
     firebase
-      .auth()
+      .auth() 
       .createUserWithEmailAndPassword(email, password)
       .then((userCredential) => {
         const userId = userCredential.user.uid;

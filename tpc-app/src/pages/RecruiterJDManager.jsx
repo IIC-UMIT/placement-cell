@@ -26,7 +26,7 @@ const RecruiterJDManager = () => {
   }, [userId]);
 
   const handleViewApplicants = jd_id => {
-    navigate(`/RecruiterPage/${jd_id}/studentsapplied`);
+    navigate(`/Recruiter/StudentsApplied/${jd_id}`);
   };
 
   const handleEdit = jd_id => {

@@ -65,6 +65,26 @@
     justify-content: center;
 }
 
+.container-forget {
+    display: flex;
+    /* width: 100vw; */
+    height: auto;
+    max-width: 600px;
+    max-height: auto;
+    background-color: #fff;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    overflow: hidden;
+    margin: 65px auto;
+}
+
+.forget-section {
+    padding: 60px 50px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
 .right-section h2 {
     font-size: 35px;
     color: #333;

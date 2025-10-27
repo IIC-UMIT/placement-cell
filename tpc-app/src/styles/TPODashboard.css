@@ -158,6 +158,7 @@
     .outletContainer {
         left: 0;
         top: 60px;
+        padding-right: 20px;
     }
 }
 

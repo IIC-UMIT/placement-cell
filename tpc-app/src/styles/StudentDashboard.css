@@ -1,7 +1,31 @@
+/* --- Responsive Design --- */
+
 /* Main Content */
 .main-content {
     padding: 20px;
     display: flex;
+    gap: 20px;
+    box-sizing: border-box;
+    width: 100%;
+    overflow-x: hidden;
+    /* Prevent horizontal overflow */
+}
+
+.LeftDashboard {
+    flex: 1 1 0;
+    min-width: 0;
+    width: 70%;
+}
+
+.RightBarDashboard {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 400px;
+    /* Restrict maximum width */
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    overflow-wrap: break-word;
 }
 
 .Welcome-message {
@@ -13,13 +37,16 @@
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
+    flex-direction: row;
 }
 
 .card-item {
     background: white;
     padding: 20px;
     border-radius: 10px;
-    width: 200px;
+    flex: 1;
+    /* Allow cards to grow evenly */
+    min-width: 180px;
     text-align: center;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
@@ -31,12 +58,13 @@
     margin: 15px 0;
     border-radius: 10px;
     box-shadow: 0px 10px 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
 }
 
 /* Upcoming Events Section */
 .homesection {
     background: white;
-    width: 860px;
+    width: 100%;
     border-radius: 15px;
     padding: 15px;
     box-shadow: 0px 10px 10px rgba(0, 0, 0, 0.1);
@@ -109,6 +137,19 @@
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    overflow-x: auto;
+    /* Ensure table is scrollable on small screens */
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th,
+.table td {
+    padding: 12px 15px;
+    text-align: left;
 }
 
 .table th {
@@ -124,8 +165,6 @@
 
 /* Announcements Card */
 .announcement-card {
-    /* width: 400px; */
-    /* height: 400px; */
     background: linear-gradient(180deg, #001F3F, #003049);
     color: white;
     border-radius: 15px;
@@ -147,7 +186,6 @@
     padding: 10px;
 }
 
-/* Scrollbar Styling */
 .announcement-list::-webkit-scrollbar {
     width: 6px;
 }
@@ -168,7 +206,6 @@
     align-items: center;
 }
 
-/* User Profile */
 .announcement .profile {
     display: flex;
     align-items: center;
@@ -181,23 +218,13 @@
     margin-right: 10px;
 }
 
-/* Timestamp */
 .announcement .timestamp {
     font-size: 12px;
     color: #B0B3C1;
 }
 
-.RightBarDashboard {
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    border-radius: 15px;
-}
-
 /* Profile Card */
 .profile-card {
-    /* width: 400px; */
     background: linear-gradient(180deg, #001F3F, #003049);
     color: white;
     padding: 20px;
@@ -222,47 +249,48 @@
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Responsive Design */
-@media (max-width: 1200px) and (min-width: 768px) {
+
+
+/* --- Responsive Design --- */
+
+/* For screens between 800px and 1500px */
+@media (max-width: 1500px) and (min-width: 1000px) {
     .main-content {
-        flex-direction: column;
+        display: flex;
+        gap: 20px;
+        padding: 20px;
     }
 
-    .Welcome-message {
-        padding: 10px !important;
-    }
-
-    .card-box {
-        gap: 10px !important;
-    }
-
-    .card-item {
-        width: 180px !important;
-    }
-
-    .chart-containerp {
-        width: 600px;
-    }
-
-    .events-section {
-        width: 600px;
+    .LeftDashboard {
+        flex: 1 1 0;
+        width: 70%;
+        min-width: 0;
     }
 
     .RightBarDashboard {
-        width: 600px !important;
-        padding: 20px 0 !important;
+        margin-right: 200px;
+        flex: 1 1 0;
+        width: 40%;
+        min-width: 0;
+    }
+}
+
+/* For screens narrower than 800px */
+@media (max-width: 999px) {
+    .main-content {
+        flex-direction: column;
+        padding: 15px;
+    }
+
+    .LeftDashboard,
+    .RightBarDashboard {
+        width: 65%;
+        min-width: 0;
     }
 
     .profile-card {
         display: none;
-    }
-
-    .announcement-card {
-        width: 600px !important;
-    }
-
-    .announcement {
-        width: 560px;
+        /* Hide profile card on small screens */
     }
 }
 
@@ -271,63 +299,70 @@
         position: relative;
     }
 
+
     .main-content {
         margin-left: 0;
         flex-direction: column;
-        padding: 30px !important;
+        padding: 20px 10px !important;
     }
+
 
     .Welcome-message {
         padding: 0 0 20px 0 !important;
     }
 
-    .LeftDashboard{
-        padding: 0 20px;
-    }
-
     .LeftDashboard,
     .RightBarDashboard {
         width: 100%;
-        margin-bottom: 20px;
     }
+
 
     .card-box {
         gap: 15px !important;
     }
 
+
     .card-item {
         width: 160px !important;
     }
 
+
     .chart-containerp {
         width: 450px;
     }
+
 
     .events-container {
         flex-direction: column;
         gap: 10px;
     }
 
+
     .events-section {
         width: 450px;
     }
 
+
     .table-container {
         overflow-x: auto;
     }
+
 
     .RightBarDashboard {
         padding: 0px !important;
         width: 450px !important;
     }
 
+
     .profile-card {
         display: none;
     }
 
+
     .announcement-card {
-        width: 450px !important;
+        width: 430px !important;
     }
+
 
     .announcement {
         display: flex;
@@ -337,10 +372,12 @@
         width: 410px;
     }
 
+
     .task-box {
         width: 100%;
     }
 }
+
 
 @media (max-width: 480px) {
     .sidebar {
@@ -349,15 +386,18 @@
         position: relative;
     }
 
+
     .main-content {
         margin-left: 0;
         flex-direction: column;
         padding: 0px !important;
     }
 
+
     .Welcome-message {
         padding: 0 0 20px 0 !important;
     }
+
 
     .LeftDashboard,
     .RightBarDashboard {
@@ -366,50 +406,60 @@
         padding: 0 !important
     }
 
+
     .card-box {
         gap: 15px !important;
     }
+
 
     .card-item {
         width: 45% !important;
     }
 
+
     .chart-containerp {
         width: 380px;
     }
+
 
     .events-container {
         flex-direction: column;
         gap: 10px;
     }
 
+
     .events-section {
         width: 380px;
     }
 
+
     .table-container {
         overflow-x: auto;
     }
+
 
     .RightBarDashboard {
         padding: 0px !important;
         width: 380px !important;
     }
 
+
     .profile-card {
         display: none;
     }
 
+
     .announcement-card {
         width: 380px !important;
     }
+
 
     .announcement {
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
         flex-direction: column;
-        width: 340px;
+        width: 335px;
     }
 
     .task-box {

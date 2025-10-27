@@ -7,9 +7,9 @@ import vilasKharat from '../assets/images/vilasKharat.jpeg';
 
 const TPOHome = () => {
   const [stats, setStats] = useState({
-    totalStudents: 462,
-    totalRecruiters: 15,
-    totalPlaced: 5,
+    totalStudents: 0,
+    totalRecruiters: 0,
+    totalPlaced: 0,
     totalNotPlaced: 0,
     companies: [],
     interviewDates: [],

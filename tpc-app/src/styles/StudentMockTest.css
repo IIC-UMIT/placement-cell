@@ -28,9 +28,8 @@
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
   animation: fadeIn 0.3s ease-in-out;
 
-  /* debug */
-  border: 2px solid red;  
-  color: black;           
+  /* Remove debug border for small screens and keep modal centered */
+  border: none; max-width: 480px; width: 95%; padding: 20px; box-sizing: border-box;
 }
 
 
@@ -76,4 +75,11 @@
 
 .overlay-content button:hover {
   background: #1666c1;
+}
+
+/* Smaller screens */
+@media (max-width: 480px) {
+  .overlay-content { padding: 14px; width: 94%; }
+  .overlay-content h2 { font-size: 1.1rem; }
+  .overlay-content ul li { font-size: 0.9rem; }
 }

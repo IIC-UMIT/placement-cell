@@ -18,14 +18,27 @@ const firebaseConfig = {
   measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID,
 };
 
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
+// Initialize Firebase (guard to avoid re-init)
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
+
 const database = firebase.database();
 const db = firebase.firestore();
-const storage = firebase.storage(); // Initialize Firebase Storage
+const storage = firebase.storage();
+const auth = firebase.auth();
 
-await firebase.auth().setPersistence('local');
+// New: warn at runtime if storageBucket likely not configured (helps diagnose CORS / wrong-bucket issues)
+if (!firebaseConfig.storageBucket) {
+  console.warn("⚠️ firebaseConfig.storageBucket is not set. Check your .env and REACT_APP_FIREBASE_STORAGE_BUCKET value.");
+} else {
+  // also log the bucket used so you can confirm it matches the bucket you applied CORS to
+  console.info("Firebase storage bucket:", firebaseConfig.storageBucket);
+}
 
-export { db, storage }; // Export storage
-export default database;
-export const auth = firebase.auth();
+// Remove top-level await (not allowed in module without async wrapper)
+// Set persistence when user signs in instead (example shown below can be moved to your auth flow)
+// firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(console.error);
+
+export { db, storage, auth, database };
+export default firebase;

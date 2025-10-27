@@ -4,6 +4,7 @@ import "firebase/compat/database";
 import { saveAs } from "file-saver"; // for Excel download
 import * as XLSX from "xlsx";
 import "../styles/ManageStudent.css";
+import StudentResume from "./StudentResume";
 
 const StudentDetails = () => {
   const [students, setStudents] = useState([]);
@@ -25,6 +26,8 @@ const StudentDetails = () => {
     dob: false,
     photograph: false,
   }); // Store selected fields for Excel export
+  const [showResumeModal, setShowResumeModal] = useState(false);
+  const [selectedStudentId, setSelectedStudentId] = useState(null);
 
   const fetchStudentData = useCallback(async () => {
     const studentRef = firebase.database().ref("Students");
@@ -42,9 +45,10 @@ const StudentDetails = () => {
             Object.keys(studentData[year][branch]).forEach((studentId) => {
               const studentInfo = studentData[year][branch][studentId];
               studentsList.push({
+                ...studentInfo,
                 year,
                 branch,
-                ...studentInfo,
+                userId: studentId,
               });
             });
           });
@@ -66,6 +70,16 @@ const StudentDetails = () => {
     .filter((student) =>
       student.name.toLowerCase().includes(searchName.toLowerCase())
     ); // Search by name filter
+
+  const handleRowClick = (studentId) => {
+    setSelectedStudentId(studentId);
+    setShowResumeModal(true);
+  };
+
+  const handleCloseResumeModal = () => {
+    setShowResumeModal(false);
+    setSelectedStudentId(null);
+  };
 
   const handleFieldSelection = (e) => {
     const { name, checked } = e.target;
@@ -98,7 +112,7 @@ const StudentDetails = () => {
     <div className="Manage-Student-Container">
       <h3>Manage Students</h3>
       <div className="filter-container">
-      <input
+        <input
           type="text"
           placeholder="Search by Name"
           value={searchName}
@@ -129,60 +143,60 @@ const StudentDetails = () => {
         </label>
       </div>
 
-      <table>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Branch</th>
-            <th>Year</th>
-            <th>CGPA</th>
-            <th>Email</th>
-            <th>LinkedIn</th>
-            <th>GitHub</th>
-            <th>Address</th>
-            <th>DOB</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredStudents.map((student, index) => (
-            <tr key={index}>
-              <td>{student.name}</td>
-              <td>{student.branch}</td>
-              <td>{student.year}</td>
-              <td>{student.cgpa || "N/A"}</td>
-              <td>{student.email || "N/A"}</td>
-              <td>
-                {student.linkedinLink ? (
-                  <a
-                    href={student.linkedinLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    LinkedIn
-                  </a>
-                ) : (
-                  "N/A"
-                )}
-              </td>
-              <td>
-                {student.githubLink ? (
-                  <a
-                    href={student.githubLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    GitHub
-                  </a>
-                ) : (
-                  "N/A"
-                )}
-              </td>
-              <td>{student.address || "N/A"}</td>
-              <td>{student.dob || "N/A"}</td>
+      <div className="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Year</th>
+              <th>Branch</th>
+              <th>CGPA</th>
+              <th>Percentage</th>
+              <th>Skills</th>
+              <th>Applications</th>
+              <th>Offers</th>
+              <th>Resume</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {filteredStudents.map((student) => (
+              <tr key={student.userId} onClick={() => handleRowClick(student.userId)}>
+                <td>{student.name || 'N/A'}</td>
+                <td>{student.email || 'N/A'}</td>
+                <td>{student.year || 'N/A'}</td>
+                <td>{student.branch || 'N/A'}</td>
+                <td>{student.cgpa || 'N/A'}</td>
+                <td>{student.avgPercent || 'N/A'}</td>
+                <td>{(Array.isArray(student.technicalSkills) ? student.technicalSkills.join(", ") : student.technicalSkills) || 'N/A'}</td>
+
+                {/* --- THE FIX IS HERE --- */}
+                {/* Check if applications is an object, then get its size. Otherwise, show 0. */}
+                <td>{student.applications && typeof student.applications === 'object' ? Object.keys(student.applications).length : 0}</td>
+
+                {/* Check if offers is an object, then get its size. Otherwise, show 0. */}
+                <td>{student.offers && typeof student.offers === 'object' ? Object.keys(student.offers).length : 0}</td>
+                {/* --- END OF FIX --- */}
+
+                <td>
+                  {student.resume ? (
+                    <a
+                      href={student.resume}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      View
+                    </a>
+                  ) : (
+                    "N/A"
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       <button onClick={() => setIsModalOpen(true)}>Download Excel</button>
 
@@ -215,7 +229,18 @@ const StudentDetails = () => {
           </div>
         </div>
       )}
-      <br/><br/><br/>
+      {/* Modal for displaying the student's resume */}
+      {showResumeModal && (
+        <div className="resume-modal-overlay" onClick={handleCloseResumeModal}>
+          <div className="resume-modal-content" onClick={(e) => e.stopPropagation()}>
+            <button className="close-button" onClick={handleCloseResumeModal}>
+              &times;
+            </button>
+            <StudentResume loggedInUser={selectedStudentId} />
+          </div>
+        </div>
+      )}
+      <br /><br /><br />
     </div>
   );
 };

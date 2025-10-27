@@ -4,12 +4,14 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import firebase from "firebase/compat/app";
 import "firebase/compat/database";
 import vilasKharat from "../assets/images/vilasKharat.jpeg";
+import profile from "../assets/images/profile.webp";
 
 const Dashboard = ({ role, loggedInUser }) => {
   const [userData, setUserData] = useState(null);
   const [announcements, setAnnouncements] = useState([]);
   const [events, setEvents] = useState([]);
   const [appliedJobs, setAppliedJobs] = useState({});
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
   // Function to calculate "X days ago"
   const getTimeAgo = (createdOn) => {
@@ -22,13 +24,90 @@ const Dashboard = ({ role, loggedInUser }) => {
     return `${diffDays} days ago`;
   };
 
-  // Fetch user details
+  // Fetch user details and also try to load Students/<year>/<branch>/<uid> profile
   useEffect(() => {
     if (!loggedInUser || !role) return;
     const userRef = firebase.database().ref(`users/${role}/${loggedInUser}`);
-    userRef.once("value").then((snapshot) => {
+    userRef.once("value").then(async (snapshot) => {
       if (snapshot.exists()) {
-        setUserData({ uid: loggedInUser, ...snapshot.val() });
+        const baseMeta = snapshot.val();
+        let merged = { uid: loggedInUser, ...baseMeta };
+
+        // If role is Student, try to load Students profile (prefer direct path if gradYear+branch present)
+        if (role === "Student") {
+          let gradYear = baseMeta.gradYear || baseMeta.graduationYear || baseMeta.grad_year;
+          let branch = baseMeta.branch || baseMeta.dept || baseMeta.department;
+
+          let studentKey = loggedInUser;
+          let studentProfile = null;
+
+          if (gradYear && branch) {
+            const snap = await firebase.database().ref(`Students/${gradYear}/${branch}/${studentKey}`).get();
+            if (snap.exists()) studentProfile = snap.val();
+          }
+
+          // Fallback: scan Students tree to find a matching record (by uid key, email or rollNo)
+          if (!studentProfile) {
+            const studentsSnap = await firebase.database().ref("Students").get();
+            const students = studentsSnap.val() || {};
+            const metaEmail = (baseMeta.email || "").toLowerCase();
+            const metaRoll = baseMeta.rollNo || baseMeta.rollno || baseMeta.roll || "";
+
+            let found = null;
+            for (const yearKey of Object.keys(students)) {
+              const yearObj = students[yearKey] || {};
+              for (const branchKey of Object.keys(yearObj)) {
+                const branchObj = yearObj[branchKey] || {};
+                // direct uid match
+                if (branchObj.hasOwnProperty(loggedInUser)) {
+                  found = { yearKey, branchKey, key: loggedInUser, data: branchObj[loggedInUser] };
+                  break;
+                }
+                // match by email or rollNo
+                for (const candidateKey of Object.keys(branchObj)) {
+                  const candidate = branchObj[candidateKey] || {};
+                  const candEmail = (candidate.email || "").toLowerCase();
+                  const candRoll = candidate.rollNo || candidate.rollno || candidate.roll || "";
+                  if (metaEmail && candEmail === metaEmail) {
+                    found = { yearKey, branchKey, key: candidateKey, data: candidate };
+                    break;
+                  }
+                  if (metaRoll && String(candRoll) === String(metaRoll)) {
+                    found = { yearKey, branchKey, key: candidateKey, data: candidate };
+                    break;
+                  }
+                }
+                if (found) break;
+              }
+              if (found) break;
+            }
+
+            if (found) {
+              gradYear = gradYear || found.yearKey;
+              branch = branch || found.branchKey;
+              studentKey = found.key;
+              studentProfile = found.data || null;
+            }
+          }
+
+          if (studentProfile) {
+            // merge student profile fields (photo, applications etc.) into userData
+            merged = { ...merged, ...studentProfile, graduationYear: gradYear, branch, studentKey };
+            // If applications exist, normalize as object
+            const apps = studentProfile.applications || {};
+            // convert array/object to object map for consistent UI
+            if (Array.isArray(apps)) {
+              // array: convert to map with indices
+              const map = {};
+              apps.forEach((val, idx) => { if (val) map[String(idx)] = val; });
+              merged.applications = map;
+            } else {
+              merged.applications = apps;
+            }
+          }
+        }
+
+        setUserData(merged);
       }
     });
   }, [loggedInUser, role]);
@@ -73,36 +152,93 @@ const Dashboard = ({ role, loggedInUser }) => {
     return () => eventRef.off();
   }, []);
 
-  // Fetch applied jobs
+  // Fetch applied jobs from Students profile (prefer the merged student data)
   useEffect(() => {
     if (!userData) return;
-    const { graduationYear, branch, uid } = userData;
-    if (!graduationYear || !branch || !uid) return;
+    // Determine correct gradYear/branch/uid to read applications
+    const graduationYear = userData.graduationYear || userData.graduationYear || userData.graduationYear;
+    const branch = userData.branch;
+    const studentKey = userData.studentKey || userData.uid;
+
+    if (!graduationYear || !branch || !studentKey) {
+      setAppliedJobs({});
+      return;
+    }
 
     const appliedRef = firebase
       .database()
-      .ref(`Students/${graduationYear}/${branch}/${uid}/applications`);
+      .ref(`Students/${graduationYear}/${branch}/${studentKey}/applications`);
 
-    appliedRef.on("value", (snapshot) => {
+    const handleSnapshot = (snapshot) => {
       const data = snapshot.val() || {};
-      // filter out undefined keys
-      const validJobs = Object.fromEntries(
-        Object.entries(data).filter(
-          ([key, job]) => key !== "undefined" && job.company
-        )
-      );
-      setAppliedJobs(validJobs);
-    });
+      // Normalize structure (object or array) and filter
+      let normalized = {};
+      if (Array.isArray(data)) {
+        data.forEach((v, i) => { if (v) normalized[String(i)] = v; });
+      } else {
+        normalized = Object.fromEntries(
+          Object.entries(data).filter(([key, job]) => key !== "undefined" && job && job.company)
+        );
+      }
+      setAppliedJobs(normalized);
+    };
 
+    appliedRef.on("value", handleSnapshot);
     return () => appliedRef.off();
   }, [userData]);
+
+  // Upload photo handler — uploads to Storage and updates Students + users/Student
+  const handlePhotoChange = async (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    if (!userData) {
+      alert("User data not loaded yet.");
+      return;
+    }
+    const graduationYear = userData.graduationYear;
+    const branch = userData.branch;
+    const studentKey = userData.studentKey || userData.uid;
+    if (!graduationYear || !branch || !studentKey) {
+      alert("Missing grad year / branch; cannot upload photo.");
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      alert("File size must be less than 2MB.");
+      return;
+    }
+
+    try {
+      setUploadingPhoto(true);
+      const timestamp = Date.now();
+      const ext = file.name.split(".").pop();
+      const destPath = `Students/${graduationYear}/${branch}/${studentKey}/photo_${timestamp}.${ext}`;
+      const storageRef = firebase.storage().ref().child(destPath);
+      const snap = await storageRef.put(file);
+      const url = await snap.ref.getDownloadURL();
+
+      // Update Students node
+      await firebase.database().ref(`Students/${graduationYear}/${branch}/${studentKey}`).update({ photo: url });
+      // Also update users/Student meta for faster lookup
+      await firebase.database().ref(`users/Student/${userData.uid}`).update({ photo: url });
+
+      // Refresh local state
+      setUserData(prev => ({ ...prev, photo: url }));
+      setUploadingPhoto(false);
+      alert("Photo uploaded successfully.");
+    } catch (err) {
+      console.error("Photo upload failed:", err);
+      setUploadingPhoto(false);
+      alert("Photo upload failed. See console for details.");
+    }
+  };
 
   if (!userData) return <p>Loading dashboard...</p>;
 
   return (
     <div className="main-content d-flex">
       {/* Left Section */}
-      <div className="LeftDashboard flex-grow-1">
+      <div className="LeftDashboard ">
         <div className="Welcome-message">
           <h2>Welcome! {userData.name}</h2>
         </div>
@@ -112,16 +248,6 @@ const Dashboard = ({ role, loggedInUser }) => {
           <div className="card-item">
             <h5>Total Applications</h5>
             <p>{Object.keys(appliedJobs).length}</p>
-          </div>
-          <div className="card-item">
-            <h5>Rejections</h5>
-            <p>
-              {Object.values(appliedJobs).filter(
-                (job) =>
-                  job.status === "Rejected" ||
-                  job.interviewStatus === "Rejected"
-              ).length}
-            </p>
           </div>
           <div className="card-item">
             <h5>Offers</h5>
@@ -225,7 +351,7 @@ const Dashboard = ({ role, loggedInUser }) => {
       <div className="RightBarDashboard">
         {/* Profile Card */}
         <div className="profile-card">
-          <img src="https://via.placeholder.com/80" alt="Profile" />
+          <img src={userData.photo || profile} alt="Profile" />
           <h5>{userData.name}</h5>
           <p>{userData.email}</p>
         </div>
@@ -253,6 +379,10 @@ const Dashboard = ({ role, loggedInUser }) => {
           </div>
         </div>
       </div>
+      <br></br>
+      <br></br>
+      <br></br>
+      <br></br>
     </div>
   );
 };

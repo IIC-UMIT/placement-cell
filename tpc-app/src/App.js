@@ -10,6 +10,9 @@ import Login from './pages/LoginPage.jsx';
 import Signup from './pages/RecruiterSignup.jsx';
 import Events from './pages/Event.jsx';
 import PageNotFound from './pages/PageNotFound.jsx';
+import ForgotPassword from './pages/ForgotPassword.jsx';
+import Settings from './pages/Settings.jsx';
+import ResetPassword from './pages/ResetPassword.jsx';
 
 import RecruiterHome from './pages/RecruiterHome.jsx';
 import RecruiterDashboard from './pages/RecruiterDashboard.jsx';
@@ -17,7 +20,7 @@ import RecruiterPage from './pages/RecruiterPage.jsx';
 import RecruiterJDManager from './pages/RecruiterJDManager.jsx';
 import RecruiterEditJD from './pages/RecruiterEditJD.jsx';
 // import RecruiterProfile from './pages/RecruiterProfile.jsx';
-import StudentApplied from './pages/StudentApplied.jsx';
+import StudentApplied from './pages/RecruiterStudentApplied.jsx';
 
 import StudentHome from './pages/StudentHome.jsx';
 import StudentDashboard from './pages/StudentDashboard.jsx';
@@ -46,6 +49,9 @@ const App = () => {
   const [userData, setUserData] = useState(null);
   const [role, setRole] = useState(null); // Store role of logged-in user
 
+  // New: indicate when Firebase auth initialization completed
+  const [authReady, setAuthReady] = useState(false);
+
   console.log(loggedInUser)
   console.log(role)
 
@@ -57,17 +63,23 @@ const App = () => {
         try {
           // Check each role database separately
           const roles = ["Student", "Recruiter", "Coordinator"];
-          let found = false
-          for (const role of roles) {
-            const userRef = await firebase.database().ref(`users/${role}/${userId}`).once("value");
-            if (userRef.exists()) {}
-            setRole(role);
-            setUserData({ ...userRef, role: role }); // Add role to user data
-            found = true;
-            break; // Exit loop once user is found in one of the roles
+          let found = false;
+          let foundUserData = null;
+          let foundRole = null;
+          for (const roleName of roles) {
+            const userRef = await firebase.database().ref(`users/${roleName}/${userId}`).once("value");
+            if (userRef.exists()) {
+              found = true;
+              foundRole = roleName;
+              foundUserData = userRef.val();
+              break; // Exit loop once user is found in one of the roles
+            }
           }
-
-          if (!found) {
+ 
+          if (found) {
+            setRole(foundRole);
+            setUserData({ ...foundUserData, role: foundRole });
+          } else {
             setRole(null);
             setUserData(null);
           }
@@ -76,15 +88,22 @@ const App = () => {
           setRole(null);
           setUserData(null);
         }
+        setAuthReady(true);
       } else {
-         setLoggedInUser(null);
+        setLoggedInUser(null);
         setRole(null);
         setUserData(null);
+        setAuthReady(true);
       }
     });
 
     return () => unsubscribe();
   }, []);
+
+  // While auth state is being determined, avoid rendering routes that redirect
+  if (!authReady) {
+    return <div style={{padding:20}}>Loading...</div>;
+  }
 
   return (
       <Routes>
@@ -94,6 +113,8 @@ const App = () => {
         <Route path="/Signup" element={<Signup />} />
         <Route path="/Events" element={<Events />} />
         <Route path="/StudentDashboard" element={<StudentDashboard userData={userData} />} />
+        <Route path="/Forgot-Password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
        
         {/* Role-based routes */}
         <Route
@@ -114,6 +135,7 @@ const App = () => {
           <Route path="ApplicationStatus" element={<ApplicationStatus role={role} loggedInUser={loggedInUser} />} />
           <Route path="EventDashboard" element={<EventDashboard role={role} />} />
           <Route path="PlacementGuidelines" element={<PlacementGuidelines role={role} />} /> 
+           <Route path="Settings" element={ loggedInUser ? <Settings /> : <Navigate to="/Login" /> } />
         </Route>
 
         <Route
@@ -130,7 +152,7 @@ const App = () => {
           <Route path="Dashboard" element={<RecruiterHome role={role} userData={userData} />} />
           <Route path="JobDescription" element={<RecruiterPage role={role} loggedInUser={loggedInUser}  />} />
           <Route path="RecruiterJDManager" element={<RecruiterJDManager role={role} />} />
-          <Route path="StudentsApplied" element={<StudentApplied role={role} />} />
+          <Route path="StudentsApplied/:jd_id" element={<StudentApplied role={role} loggedInUser={loggedInUser}/>} />
         </Route>
 
         <Route path="/TPOPage" element={

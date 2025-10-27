@@ -90,12 +90,7 @@ const RecruiterDashboard = () => {
                             >
                                 Recruitment Status
                             </button>
-                            <button
-                                className="sidebarButton"
-                                onClick={() => handleNavigation("/Recruiter/StudentsApplied")}
-                            >
-                                Students Applied
-                            </button>
+                           
                             {/* <button
                             className="sidebarButton"
                             onClick={() => handleNavigation("/Student/Profile")}

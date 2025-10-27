@@ -43,3 +43,16 @@
     border-radius: 5px;
   }
   
+  /* Responsive tweaks */
+  @media (max-width: 900px) {
+    .student-resources { width: 90%; padding: 18px; }
+    .tabs { flex-wrap: wrap; gap: 6px; }
+    .tab-content { font-size: 0.95rem; }
+  }
+
+  @media (max-width: 600px) {
+    .student-resources { width: 95%; padding: 14px; }
+    .blog { padding: 12px; }
+    .tabs button { padding: 8px; font-size: 0.95rem; }
+    .tab-content { padding: 10px; }
+  }

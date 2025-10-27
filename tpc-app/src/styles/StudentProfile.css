@@ -47,6 +47,7 @@ select:focus {
   padding: 0.75rem 1.5rem;
   border: none;
   border-radius: 8px;
+  padding: 10px;
   cursor: pointer;
   font-size: 1rem;
   transition: background-color 0.3s ease;
@@ -76,8 +77,8 @@ select:focus {
 
 .student-page {
   padding: 20px;
-  max-width: 800px;
-  margin: 0 auto;
+  max-width: 1000px;
+  /* margin: 0 auto; */
 }
 
 .form-group {
@@ -175,36 +176,30 @@ select:focus {
   margin-bottom: 0;
 }
 
+/* --- Responsive tweaks --- */
+@media (max-width: 1024px) {
+  .student-page { padding: 16px; }
+  .form-row { flex-wrap: wrap; gap: 0.6rem; }
+  .form-row > .form-group { flex: 1 1 100%; min-width: 0; }
+  .flex-row { flex-direction: column; }
+  .form-submit { text-align: center; margin-top: 12px; }
+  .form-submit button { width: 100%; box-sizing: border-box; }
+  .sgpa-percent-inputs { flex-wrap: wrap; gap: 0.5rem; }
+  .sgpa-percent-inputs input { width: 100%; max-width: none; }
+}
+
 @media (max-width: 600px) {
-  .student-page {
-    padding: 10px;
-  }
-  .form-group {
-    margin-bottom: 10px;
-  }
-  .form-group input,
-  .form-group select,
-  .form-group textarea {
-    padding: 6px;
-  }
-  .SGPA .form-group {
-    flex-direction: column;
-  }
-  .flex-row {
-    flex-direction: column;
-    gap: 0;
-  }
-  .form-row {
-    flex-direction: column;
-    gap: 0;
-  }
-  .sgpa-percent-row {
-    flex-direction: column;
-    gap: 0;
-  }
-  .sgpa-percent-col {
-    min-width: 0;
-  }
+  .student-page { padding: 10px; }
+  .form-group { margin-bottom: 10px; }
+  .form-row > .form-group { padding: 0; }
+  input[type="text"], input[type="number"], select, textarea { font-size: 0.95rem; }
+  .form-submit button { padding: 12px 10px; font-size: 1rem; }
+  .sgpa-percent-inputs input { width: 100%; }
+}
+
+/* Ensure long forms can scroll on small screens without clipping buttons */
+@media (max-height: 700px) {
+  .student-page { max-height: 100vh; overflow-y: auto; }
 }
 
 .form-group button,
@@ -214,6 +209,7 @@ button.form-submit {
   border: none;
   height: 30px;
   border-radius: 8px;
+  padding: 0 10px;
   cursor: pointer;
   font-size: 1rem;
   transition: background-color 0.3s ease;

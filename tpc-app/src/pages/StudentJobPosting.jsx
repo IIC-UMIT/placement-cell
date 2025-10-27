@@ -77,30 +77,101 @@ const StudentJobPosting = () => {
     }
 
     try {
-      // Step 1: Fetch user info
-      const userRef = firebase.database().ref(`users/Student/${loggedInUser}`);
-      const userSnap = await userRef.once("value");
-      const userData = userSnap.val();
-      if (!userData) {
-        alert("User details not found.");
-        return;
+      // Step 1: Fetch user meta (try multiple possible metadata paths / keys)
+      let meta = null;
+      try {
+        const possibleMetaPaths = [
+          `users/Student/${loggedInUser}`,
+          `users/Students/${loggedInUser}`,
+          `users/${loggedInUser}`,
+        ];
+        for (const p of possibleMetaPaths) {
+          const snap = await firebase.database().ref(p).get();
+          if (snap.exists()) {
+            meta = snap.val();
+            break;
+          }
+        }
+      } catch (mErr) {
+        console.warn('Error reading user meta:', mErr);
       }
-      const { branch, graduationYear } = userData;
 
-      // Step 2: Fetch student academic data
-      const studentRef = firebase
-        .database()
-        .ref(`Students/${graduationYear}/${branch}/${loggedInUser}`);
-      const studentSnap = await studentRef.once("value");
-      const studentData = studentSnap.val();
+      // Accept several possible field names for graduationYear and branch
+      let graduationYear = meta && (meta.gradYear || meta.graduationYear || meta.grad_year);
+      let branch = meta && (meta.branch || meta.dept || meta.department);
+
+      // Step 2: Attempt to fetch student academic data if we have gradYear + branch
+      let studentData = null;
+      let studentKey = loggedInUser; // default key we expect under Students/<year>/<branch>/<studentKey>
+      if (graduationYear && branch) {
+        const studentRef = firebase.database().ref(`Students/${graduationYear}/${branch}/${studentKey}`);
+        const studentSnap = await studentRef.get();
+        if (studentSnap.exists()) {
+          studentData = studentSnap.val();
+        }
+      }
+
+      // Fallback: scan the Students tree to find the record if not found yet
       if (!studentData) {
-        alert("Student academic record not found.");
+        const studentsSnap = await firebase.database().ref('Students').get();
+        const students = studentsSnap.val() || {};
+        let found = null;
+
+        // prepare match values we can use
+        const metaEmail = meta && (meta.email || meta.emailId || meta.email_id);
+        const metaRoll = meta && (meta.rollNo || meta.rollno || meta.roll_no || meta.roll);
+
+        for (const yearKey of Object.keys(students)) {
+          const yearObj = students[yearKey] || {};
+          for (const branchKey of Object.keys(yearObj)) {
+            const branchObj = yearObj[branchKey] || {};
+            // Try to match by uid key directly first
+            if (branchObj.hasOwnProperty(loggedInUser)) {
+              found = { gradYear: yearKey, branch: branchKey, key: loggedInUser, data: branchObj[loggedInUser] };
+              break;
+            }
+            // Then check by email or rollNo inside each record
+            for (const candidateKey of Object.keys(branchObj)) {
+              const candidate = branchObj[candidateKey] || {};
+              const candEmail = candidate.email || candidate.emailId || candidate.email_id;
+              const candRoll = candidate.rollNo || candidate.rollno || candidate.roll_no || candidate.roll;
+              if (metaEmail && candEmail && String(candEmail).toLowerCase() === String(metaEmail).toLowerCase()) {
+                found = { gradYear: yearKey, branch: branchKey, key: candidateKey, data: candidate };
+                break;
+              }
+              if (metaRoll && candRoll && String(candRoll) === String(metaRoll)) {
+                found = { gradYear: yearKey, branch: branchKey, key: candidateKey, data: candidate };
+                break;
+              }
+            }
+            if (found) break;
+          }
+          if (found) break;
+        }
+
+        if (found) {
+          graduationYear = found.gradYear;
+          branch = found.branch;
+          studentKey = found.key; // use actual key under Students tree
+          studentData = found.data || null;
+          console.info('Student record located by fallback search:', { graduationYear, branch, studentKey });
+        }
+      }
+
+      // If still no student data, show clearer message + console debug info
+      if (!studentData) {
+        console.error('Student academic record not found for uid:', loggedInUser, {
+          metaFound: !!meta,
+          meta,
+          attemptedPath: `Students/${graduationYear || 'N/A'}/${branch || 'N/A'}/${loggedInUser}`,
+        });
+        alert("Student academic record not found. Please ensure your profile (branch & graduation year) is saved under Students/<year>/<branch>/<yourUid> or users/Student/<yourUid> contains branch and gradYear.");
         return;
       }
 
+      // From here on, studentData exists — proceed with existing checks
       const {
         cgpa,
-        avgPercent,
         classXPercent,
         classXIIPercent,
         diplomaPercent,
@@ -126,38 +197,35 @@ const StudentJobPosting = () => {
       const minCgpa = parseFloat(eligibility.minimum_cgpa_grade);
       const minPercent = parseFloat(eligibility.minimum_percentage);
 
-      // Step 4: Eligibility checks
-      // --- CGPA ---
+      // Step 4: Eligibility checks (unchanged)
       if (!cgpa || isNaN(parseFloat(cgpa))) {
         alert("CGPA is missing. Please update your profile.");
         return;
       }
-      if (parseFloat(cgpa) < minCgpa) {
+      if (!isNaN(minCgpa) && parseFloat(cgpa) < minCgpa) {
         alert(
           `You cannot apply. Required CGPA: ${minCgpa}, Your CGPA: ${cgpa}`
         );
         return;
       }
 
-      // --- 10th ---
       if (!classXPercent || isNaN(parseFloat(classXPercent))) {
         alert("10th percentage is missing. Please update your profile.");
         return;
       }
-      if (parseFloat(classXPercent) < minPercent) {
+      if (!isNaN(minPercent) && parseFloat(classXPercent) < minPercent) {
         alert(
           `You cannot apply. Required Percentage: ${minPercent}%. Your 10th: ${classXPercent}%`
         );
         return;
       }
 
-      // --- 12th or Diploma ---
       if (hasDiploma === "Yes") {
         if (!diplomaPercent || isNaN(parseFloat(diplomaPercent))) {
           alert("Diploma percentage is missing. Please update your profile.");
           return;
         }
-        if (parseFloat(diplomaPercent) < minPercent) {
+        if (!isNaN(minPercent) && parseFloat(diplomaPercent) < minPercent) {
           alert(
             `You cannot apply. Required Percentage: ${minPercent}%. Your Diploma: ${diplomaPercent}%`
           );
@@ -168,7 +236,7 @@ const StudentJobPosting = () => {
           alert("12th percentage is missing. Please update your profile.");
           return;
         }
-        if (parseFloat(classXIIPercent) < minPercent) {
+        if (!isNaN(minPercent) && parseFloat(classXIIPercent) < minPercent) {
           alert(
             `You cannot apply. Required Percentage: ${minPercent}%. Your 12th: ${classXIIPercent}%`
           );
@@ -176,8 +244,7 @@ const StudentJobPosting = () => {
         }
       }
 
-      // --- Backlogs ---
-      if (backlog && backlog.toLowerCase() === "yes") {
+      if (backlog && String(backlog).toLowerCase() === "yes") {
         alert("You cannot apply. You have an active backlog.");
         return;
       }
@@ -187,7 +254,12 @@ const StudentJobPosting = () => {
         .database()
         .ref(`Recruiters/${recruiterId}/${jd_id}/appliedstudents`);
       const appliedSnap = await appliedRef.once("value");
-      const appliedList = appliedSnap.val() || [];
+      let appliedList = appliedSnap.val() || [];
+
+      // Normalize appliedList whether it's an array or an object
+      if (!Array.isArray(appliedList) && appliedList && typeof appliedList === 'object') {
+        appliedList = Object.values(appliedList);
+      }
 
       if (appliedList.includes(loggedInUser)) {
         alert("You have already applied to this job.");
@@ -196,18 +268,17 @@ const StudentJobPosting = () => {
 
       await appliedRef.set([...appliedList, loggedInUser]);
 
-
-      // Step 6: Save in Student’s appliedJobs
+      // Step 6: Save in Student’s appliedJobs (use studentKey for the actual Students path)
       const statusRef = firebase
         .database()
         .ref(
-          `Students/${graduationYear}/${branch}/${loggedInUser}/applications/${jd_id}`
+          `Students/${graduationYear}/${branch}/${studentKey}/applications/${jd_id}`
         );
 
       await statusRef.set({
         company: recruiterDetails.company_name || "",
         jobTitle: jobData.placement?.job_title || jobData.internship?.internship_title || "",
-        status: "Applied", // Initial stage
+        status: "Applied",
         oaInviteSent: false,
         interviewStatus: "Pending",
         offer: {
@@ -220,6 +291,7 @@ const StudentJobPosting = () => {
         ]
       });
 
+      console.info('Application saved at:', `Students/${graduationYear}/${branch}/${studentKey}/applications/${jd_id}`);
       alert("Application submitted successfully!");
     } catch (err) {
       console.error("Application failed:", err);

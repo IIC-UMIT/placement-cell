@@ -114,7 +114,7 @@ function LoginPage({ setLoggedInUser,setRole }) {
               {showPassword ? "Hide Password" : "Show Password"}
             </div>
 
-            <a href="/forgot-password" className="forgot-password-link">
+            <a href="/Forgot-Password" className="forgot-password-link" style={{display:'block', marginTop:8}}>
               Forgot your password?
             </a>
             {errors && <span className="error-message">{errors}</span>}

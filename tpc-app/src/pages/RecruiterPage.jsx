@@ -1,11 +1,14 @@
 import React, { useState, useRef } from 'react';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/database';
+import 'firebase/compat/storage';
 import '../styles/RecruiterPage.css';
 
 function RecruiterPage({ loggedInUser }) {
+    
     const [companyDetails, setCompanyDetails] = useState({
         company_name: '',
+        company_type: '',
         industry_sector: '',
         company_overview: '',
         website: '',
@@ -37,9 +40,10 @@ function RecruiterPage({ loggedInUser }) {
             },
             selection_process: {
                 recruitment_stages: [
-                    'Resume shortlisting',
-                    'Technical test',
-                    'Interviews',
+                    'Resume Shortlisting',
+                    'Online Assessment',
+                    'Technical Interview',
+                    'HR Interview',
                 ],
                 assessment_details: '',
                 interview_process: [
@@ -76,6 +80,9 @@ function RecruiterPage({ loggedInUser }) {
     });
 
     const [isInternshipEnabled, setIsInternshipEnabled] = useState(false);
+    const [logoFile, setLogoFile] = useState(null);
+    const [logoPreview, setLogoPreview] = useState('');
+    const [jdPdfFile, setJdPdfFile] = useState(null);
 
     // Add refs for required fields
     const requiredRefs = {
@@ -129,22 +136,6 @@ function RecruiterPage({ loggedInUser }) {
         }
     };
 
-    // const handleFormChange = (e) => {
-    //     const { name, value } = e.target;
-    //     setFormData((prevData) => ({
-    //         ...prevData,
-    //         [name]: value,
-    //     }));
-
-    //     if (value && value.trim() !== '') {
-    //         setMissingFields((prev) => {
-    //             const updated = { ...prev };
-    //             delete updated[name];
-    //             return updated;
-    //         });
-    //     }
-    // };
-
     const handleFormChange = (e) => {
         const { name, value } = e.target;
         const keys = name.split(".");
@@ -176,49 +167,192 @@ function RecruiterPage({ loggedInUser }) {
         }
     };
 
+    // Recruitment stages handlers (placement selection process)
+    const updateStage = (index, value) => {
+        setFormData(prev => {
+            const updated = { ...prev };
+            if (!updated.placement) updated.placement = {};
+            if (!updated.placement.selection_process) updated.placement.selection_process = {};
+            const stages = Array.isArray(updated.placement.selection_process.recruitment_stages)
+                ? [...updated.placement.selection_process.recruitment_stages]
+                : [];
+            stages[index] = value;
+            updated.placement.selection_process.recruitment_stages = stages;
+            return updated;
+        });
+    };
+    const addStage = () => {
+        setFormData(prev => {
+            const updated = { ...prev };
+            if (!updated.placement) updated.placement = {};
+            if (!updated.placement.selection_process) updated.placement.selection_process = {};
+            const stages = Array.isArray(updated.placement.selection_process.recruitment_stages)
+                ? [...updated.placement.selection_process.recruitment_stages]
+                : [];
+            stages.push('');
+            updated.placement.selection_process.recruitment_stages = stages;
+            return updated;
+        });
+    };
+    const removeStage = (index) => {
+        setFormData(prev => {
+            const updated = { ...prev };
+            if (!updated.placement) updated.placement = {};
+            if (!updated.placement.selection_process) updated.placement.selection_process = {};
+            const stages = Array.isArray(updated.placement.selection_process.recruitment_stages)
+                ? [...updated.placement.selection_process.recruitment_stages]
+                : [];
+            stages.splice(index, 1);
+            updated.placement.selection_process.recruitment_stages = stages;
+            return updated;
+        });
+    };
 
+
+    // Final submit: create company record (if new) and job (JD) referencing companyId
     const handleSubmit = async (e) => {
         e.preventDefault();
-
-        // ... your validation logic here ...
-
         try {
-            const jdprofile_id = Math.floor(Date.now() / 1000);
+            if (!loggedInUser) {
+                alert('You must be logged in to submit a JD');
+                return;
+            }
+
+            // create or find company under Recruiters/<user>/companies
+            const companiesRef = firebase.database().ref(`Recruiters/${loggedInUser}/companies`);
+            const companiesSnap = await companiesRef.orderByChild('company_name').equalTo(companyDetails.company_name).once('value');
+            let companyId = null;
+            if (companiesSnap.exists()) {
+                const val = companiesSnap.val();
+                companyId = Object.keys(val)[0];
+            } else {
+                const newCompRef = companiesRef.push();
+                await newCompRef.set({
+                    company_name: companyDetails.company_name,
+                    industry_sector: companyDetails.industry_sector,
+                    company_overview: companyDetails.company_overview,
+                    website: companyDetails.website,
+                    locations: companyDetails.locations,
+                    companyContact: companyDetails.companyContact,
+                    alternateContact: companyDetails.alternateContact,
+                    createdAt: firebase.database.ServerValue.TIMESTAMP,
+                });
+                companyId = newCompRef.key;
+            }
+
+            // Upload logo (if provided) to company path and update company node
+            if (logoFile) {
+                if (!logoFile.type.startsWith('image/')) {
+                    alert('Please upload a valid image file for company logo.');
+                    return;
+                }
+                if (logoFile.size > 1024 * 1024 * 2) {
+                    alert('Logo must be smaller than 2MB.');
+                    return;
+                }
+
+                const user = firebase.auth().currentUser;
+                if (!user) {
+                    alert("Please log in before uploading files.");
+                    return;
+                }
+
+                const storageRef = firebase.storage().ref();
+                const path = `recruiter_companies/${user.uid}/${companyId}/${logoFile.name}`;
+                const snap = await storageRef.child(path).put(logoFile);
+                const url = await snap.ref.getDownloadURL();
+
+                await firebase.database()
+                    .ref(`Recruiters/${user.uid}/companies/${companyId}`)
+                    .update({ company_logo_url: url });
+            }
 
 
-            const recruiterRef = firebase
-                .database()
-                .ref(`Recruiters/${loggedInUser}/${jdprofile_id}`);
+            // Create JD entry under Recruiters/<user>/jobs/<jd_id>
+            const jd_id_val = Math.floor(Date.now() / 1000);
+            const jobRef = firebase.database().ref(`Recruiters/${loggedInUser}/jobs/${jd_id_val}`);
 
-            await recruiterRef.set({
-                company_name: companyDetails.company_name,
-                industry_sector: companyDetails.industry_sector,
-                company_overview: companyDetails.company_overview,
-                website: companyDetails.website,
-                locations: companyDetails.locations,
-                companyContact: companyDetails.companyContact,
-                alternateContact: companyDetails.alternateContact,
+            // Upload JD PDF to job path (if present)
+            let jdPdfUrl = null;
+            if (jdPdfFile) {
+                if (jdPdfFile.type !== 'application/pdf') {
+                    alert('Please upload a PDF file for the JD.');
+                    return;
+                }
+                if (jdPdfFile.size > 1024 * 1024 * 5) {
+                    alert('JD PDF must be smaller than 5MB.');
+                    return;
+                }
 
-                placement: {
-                    ...formData.placement,
-                },
+                const user = firebase.auth().currentUser;
+                if (!user) {
+                    alert("Please log in before uploading files.");
+                    return;
+                }
 
-                // Save internship only if enabled
-                ...(isInternshipEnabled && {
-                    internship: {
-                        ...formData.internship,
-                    },
-                }),
+                const storageRef = firebase.storage().ref();
+                const path = `recruiter_jds/${user.uid}/${jd_id_val}/${jdPdfFile.name}`;
+                const snap = await storageRef.child(path).put(jdPdfFile);
+                jdPdfUrl = await snap.ref.getDownloadURL();
+            }
 
+
+            const jobPayload = {
+                companyId,
+                company_name: companyDetails.company_name, // keep for convenience/backfill
+                placement: { ...formData.placement },
+                ...(isInternshipEnabled && { internship: { ...formData.internship } }),
+                jd_pdf_url: jdPdfUrl || null,
                 postRecruitmentStatus: true,
-            });
+                createdAt: firebase.database.ServerValue.TIMESTAMP,
+            };
 
-            alert("Details submitted successfully!");
+            await jobRef.set(jobPayload);
+
+            alert('Details submitted successfully! Company stored at companies/' + companyId + ' and JD created.');
+            setCompanyDetails({
+                company_name: '', industry_sector: '', company_overview: '', website: '', locations: [{ location_name: '', address: '' }], companyContact: '', alternateContact: '',
+            });
+            setFormData({
+                company_name: '', placement: { ...formData.placement }, internship: { ...formData.internship }
+            });
+            setLogoFile(null); setLogoPreview(''); setJdPdfFile(null);
         } catch (error) {
-            console.error("Error submitting details:", error);
-            alert("Failed to submit details. Please try again.");
+            console.error('Error submitting details:', error);
+            alert('Failed to submit details. Please try again.');
         }
     };
+
+    const handleLogoChange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (!file.type.startsWith('image/')) {
+            alert('Please upload a valid image file for company logo.');
+            return;
+        }
+        if (file.size > 1024 * 1024 * 2) {
+            alert('Logo must be smaller than 2MB.');
+            return;
+        }
+        setLogoFile(file);
+        const reader = new FileReader();
+        reader.onload = () => setLogoPreview(reader.result);
+        reader.readAsDataURL(file);
+    };
+
+    const handlePdfChange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (file.type !== 'application/pdf') {
+            alert('Please upload a PDF file for the JD.');
+            return;
+        }
+        if (file.size > 1024 * 1024 * 5) {
+            alert('JD PDF must be smaller than 5MB.');
+            return;
+        }
+        setJdPdfFile(file);
+    }
 
 
     return (
@@ -338,6 +472,18 @@ function RecruiterPage({ loggedInUser }) {
                             />
                         </div>
 
+                        {/* File uploads: Logo and JD PDF */}
+                        <div className="form-group">
+                            <label>Company Logo (image, max 2MB)</label>
+                            <input type="file" accept="image/*" onChange={handleLogoChange} />
+                            {logoPreview && <img src={logoPreview} alt="logo preview" style={{ width: 120, marginTop: 8 }} />}
+                        </div>
+
+                        <div className="form-group">
+                            <label>Upload JD PDF (PDF, max 5MB)</label>
+                            <input type="file" accept="application/pdf" onChange={handlePdfChange} />
+                        </div>
+
                         <h3>Placement Details</h3>
                         <div className="form-group">
                             <label htmlFor="placement.job_title">
@@ -361,7 +507,7 @@ function RecruiterPage({ loggedInUser }) {
                                 Job Description
                                 <span className="required-asterisk">*</span>
                             </label>
-                            <input
+                            <textarea
                                 type="text"
                                 name="placement.job_desc"
                                 ref={requiredRefs['placement.job_desc']}
@@ -530,7 +676,7 @@ function RecruiterPage({ loggedInUser }) {
                                 type="text"
                                 name="placement.eligibility_criteria.minimum_percentage "
                                 ref={requiredRefs['placement.eligibility_criteria.minimum_percentage ']}
-                                value={formData.placement.eligibility_criteria.minimum_percentage }
+                                value={formData.placement.eligibility_criteria.minimum_percentage}
                                 onChange={handleFormChange}
                                 placeholder="Enter minimum Percentage"
                             />
@@ -611,6 +757,24 @@ function RecruiterPage({ loggedInUser }) {
                             {missingFields['placement.selection_process.assessment_details'] && (
                                 <div className="required-message">This is a required field</div>
                             )}
+                        </div>
+                        <div className="form-group">
+                            <label>Recruitment Stages</label>
+                            {Array.isArray(formData.placement.selection_process.recruitment_stages) &&
+                                formData.placement.selection_process.recruitment_stages.map((s, idx) => (
+                                    <div key={idx} style={{ display: 'flex', gap: '8px', marginBottom: '6px' }}>
+                                        <input
+                                            type="text"
+                                            value={s}
+                                            onChange={(e) => updateStage(idx, e.target.value)}
+                                            placeholder={`Stage ${idx + 1}`}
+                                        />
+                                        <button type="button" onClick={() => removeStage(idx)}>Remove</button>
+                                    </div>
+                                ))}
+                            <div>
+                                <button type="button" onClick={addStage}>Add Stage</button>
+                            </div>
                         </div>
                         <div className="form-group">
                             <label htmlFor="placement.selection_process.expected_timeline">

@@ -102,11 +102,17 @@ const StudentDashboard = () => {
                             >
                                 Application Status
                             </button>
-                            <button
+                            {/* <button
                                 className="sidebarButton"
                                 onClick={() => handleNavigation("/Student/MockTests")}
                             >
                                 Mock Tests
+                            </button> */}
+                            <button
+                                className="sidebarButton"
+                                onClick={() => handleNavigation("/Student/Settings")}
+                            >
+                                Change Password
                             </button>
                             <button className="sidebarButton" onClick={handleLogout}>
                                 Sign Out

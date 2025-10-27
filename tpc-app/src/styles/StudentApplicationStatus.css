@@ -15,6 +15,10 @@
   color: #2c3e50;
 }
 
+@media (max-width: 900px) {
+  .application-status-container { padding: 12px; }
+}
+
 /* Card */
 .status-card {
   background: #fff;
@@ -34,6 +38,11 @@
   margin-bottom: 12px;
   color: #2c3e50;
   font-size: 22px;
+}
+
+@media (max-width: 900px) {
+  .status-card { padding: 14px; border-radius: 10px; }
+  .status-card h3 { font-size: 18px; }
 }
 
 /* Text */
@@ -106,6 +115,12 @@
   color: #555;
 }
 
+@media (max-width: 480px) {
+  .status-card { padding: 12px; }
+  .status-card p, .status-card ul li { font-size: 14px; }
+  .offer-section { padding: 10px; }
+  .status-badge { padding: 8px 10px; font-size: 13px; }
+}
 
 /* Status Badge */
 .status-badge {

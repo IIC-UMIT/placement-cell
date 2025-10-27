@@ -24,11 +24,11 @@ const MockTestsPage = ({ studentId }) => {
     if (loading) return <p>Loading...</p>;
 
     // ✅ Payment Handler
-    const handlePayment = async () => {
+    const handlePayment = async (amount) => {
         try {
             // 1️⃣ Create Razorpay order from backend
             const { data: order } = await axios.post("http://localhost:5000/create-order", {
-                amount: 99,
+                amount: amount,
             });
 
             const options = {

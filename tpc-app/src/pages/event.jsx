@@ -6,7 +6,6 @@ import "../styles/Event.css";
 const Events = () => {
   const [eventsData, setEventsData] = useState([]);
   const [scrollingImages, setScrollingImages] = useState([]);
-  const [selectedEvent, setSelectedEvent] = useState(null);
 
   useEffect(() => {
     const db = getDatabase();
@@ -101,7 +100,7 @@ const Events = () => {
         <h3>Events Conducted</h3>
         <div class="d-flex flex-row flex-wrap justify-content-between">
           {conductedEvents.map((event, index) => (
-            <div key={index} className="event-card" onClick={() => setSelectedEvent(event)}>
+            <div key={index} className="event-card">
               <motion.img
                 src={event.image && event.image[0]}
                 alt={event.name}

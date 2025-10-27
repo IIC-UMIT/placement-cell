@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import database from '../firebaseConfig';
 import '../styles/TeamPage.css';
@@ -73,17 +73,17 @@ const ContactUs = () => {
 
       {/* Modal (if needed later) */}
       {
-        // selectedMember && (
-        //   <div className="modal">
-        //     <div className="modal-content">
-        //       <span className="close" onClick={() => setSelectedMember(null)}>&times;</span>
-        //       <img src={selectedMember.img} alt={selectedMember.name} className="modal-img" />
-        //       <h2>{selectedMember.name}</h2>
-        //       <p><strong>Role:</strong> {selectedMember.role}</p>
-        //       <p><strong>Email:</strong> {selectedMember.email}</p>
-        //     </div>
-        //   </div>
-        // )
+        selectedMember && (
+          <div className="modal">
+            <div className="modal-content">
+              <span className="close" onClick={() => setSelectedMember(null)}>&times;</span>
+              <img src={selectedMember.img} alt={selectedMember.name} className="modal-img" />
+              <h2>{selectedMember.name}</h2>
+              <p><strong>Role:</strong> {selectedMember.role}</p>
+              <p><strong>Email:</strong> {selectedMember.email}</p>
+            </div>
+          </div>
+        )
       }
     </div>
   );

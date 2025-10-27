@@ -1,61 +1,68 @@
 import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/database';
+import 'firebase/compat/storage';
 import '../styles/RecruiterPage.css';
 
-function RecruiterEditJD({ loggedInUser, jdId }) {
-  const defaultPlacement = {
-    job_title: '',
-    job_desc: '',
-    type_of_employment: '',
-    noOfExpectedHires: '',
-    jobLocation: '',
-    eligibility_criteria: {
-      required_qualifications: '',
-      skill_requirements: '',
-      batch_year_of_study: '',
-      minimum_cgpa_grade: '',
-      other_criteria: '',
-    },
-    remote_on_site: '',
-    ctcAndBreakup: {
-      salary: '',
-      bonus: '',
-      additional_benefits: '',
-    },
-    selection_process: {
-      recruitment_stages: [
-        'Resume shortlisting',
-        'Technical test',
-        'Interviews',
-      ],
-      assessment_details: '',
-      interview_process: [
-        { round: 1, focus: 'Technical/HR' },
-      ],
-      expected_timeline: '',
-    },
-  };
+// Stable defaults moved to module scope so hooks can depend on them safely
+const defaultPlacement = {
+  job_title: '',
+  job_desc: '',
+  type_of_employment: '',
+  noOfExpectedHires: '',
+  jobLocation: '',
+  eligibility_criteria: {
+    required_qualifications: '',
+    skill_requirements: '',
+    batch_year_of_study: '',
+    minimum_cgpa_grade: '',
+    other_criteria: '',
+  },
+  remote_on_site: '',
+  ctcAndBreakup: {
+    salary: '',
+    bonus: '',
+    additional_benefits: '',
+  },
+  selection_process: {
+    // Provide recruiter-friendly defaults; they can add/remove/update these
+    recruitment_stages: [
+      'OA',
+      'Technical',
+      'HR',
+    ],
+    assessment_details: '',
+    interview_process: [
+      { round: 1, focus: 'Technical/HR' },
+    ],
+    expected_timeline: '',
+  },
+};
 
-  const defaultInternship = {
-    internship_title: '',
-    internship_description: '',
-    duration: { start_date: '', end_date: '' },
-    type_of_employment: '',
-    remote_on_site: '',
-    eligibility_criteria: {
-      required_qualifications: '',
-      skill_requirements: '',
-      batch_year_of_study: '',
-      minimum_cgpa_grade: '',
-      other_criteria: '',
-    },
-    ctcAndBreakup: {
-      stipend: '',
-      bonus: '',
-      additional_benefits: '',
-    },
-  };
+const defaultInternship = {
+  internship_title: '',
+  internship_description: '',
+  duration: { start_date: '', end_date: '' },
+  type_of_employment: '',
+  remote_on_site: '',
+  eligibility_criteria: {
+    required_qualifications: '',
+    skill_requirements: '',
+    batch_year_of_study: '',
+    minimum_cgpa_grade: '',
+    other_criteria: '',
+  },
+  ctcAndBreakup: {
+    stipend: '',
+    bonus: '',
+    additional_benefits: '',
+  },
+};
+
+function RecruiterEditJD() {
+  const { jd_id } = useParams();
+  const loggedInUser = firebase.auth().currentUser?.uid;
 
   const [loading, setLoading] = useState(true);
   const [companyDetails, setCompanyDetails] = useState({
@@ -72,14 +79,20 @@ function RecruiterEditJD({ loggedInUser, jdId }) {
     internship: defaultInternship,
   });
   const [isInternshipEnabled, setIsInternshipEnabled] = useState(false);
+  const [logoFile, setLogoFile] = useState(null);
+  const [logoPreview, setLogoPreview] = useState('');
+  const [existingLogoUrl, setExistingLogoUrl] = useState('');
+  const [jdPdfFile, setJdPdfFile] = useState(null);
+  const [existingJdPdfUrl, setExistingJdPdfUrl] = useState('');
 
   // 🔹 Load JD Data from Firebase
   useEffect(() => {
     const fetchJD = async () => {
       try {
+        if (!loggedInUser || !jd_id) return;
         const snapshot = await firebase
           .database()
-          .ref(`Recruiters/${loggedInUser}/${jdId}`)
+          .ref(`Recruiters/${loggedInUser}/${jd_id}`)
           .once('value');
 
         if (snapshot.exists()) {
@@ -94,6 +107,10 @@ function RecruiterEditJD({ loggedInUser, jdId }) {
             companyContact: data.companyContact || '',
             alternateContact: data.alternateContact || '',
           });
+
+          // Load file urls if present
+          if (data.company_logo_url) setExistingLogoUrl(data.company_logo_url);
+          if (data.jd_pdf_url) setExistingJdPdfUrl(data.jd_pdf_url);
 
           setFormData({
             placement: { ...defaultPlacement, ...(data.placement || {}) },
@@ -110,7 +127,7 @@ function RecruiterEditJD({ loggedInUser, jdId }) {
     };
 
     fetchJD();
-  }, [loggedInUser, jdId]);
+  }, [loggedInUser, jd_id]);
 
   // 🔹 Handle changes
   const handleCompanyChange = (e) => {
@@ -133,17 +150,108 @@ function RecruiterEditJD({ loggedInUser, jdId }) {
     });
   };
 
+  // Recruitment stages handlers (placement selection process)
+  const updateStage = (index, value) => {
+    setFormData(prev => {
+      const updated = { ...prev };
+      const stages = Array.isArray(updated.placement.selection_process.recruitment_stages)
+        ? [...updated.placement.selection_process.recruitment_stages]
+        : [];
+      stages[index] = value;
+      updated.placement.selection_process.recruitment_stages = stages;
+      return updated;
+    });
+  };
+  const addStage = () => {
+    setFormData(prev => {
+      const updated = { ...prev };
+      const stages = Array.isArray(updated.placement.selection_process.recruitment_stages)
+        ? [...updated.placement.selection_process.recruitment_stages]
+        : [];
+      stages.push('');
+      updated.placement.selection_process.recruitment_stages = stages;
+      return updated;
+    });
+  };
+  const removeStage = (index) => {
+    setFormData(prev => {
+      const updated = { ...prev };
+      const stages = Array.isArray(updated.placement.selection_process.recruitment_stages)
+        ? [...updated.placement.selection_process.recruitment_stages]
+        : [];
+      stages.splice(index, 1);
+      updated.placement.selection_process.recruitment_stages = stages;
+      return updated;
+    });
+  };
+
+  // File inputs
+  const handleLogoChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    // validate image
+    if (!file.type.startsWith('image/')) {
+      alert('Please upload a valid image file for company logo.');
+      return;
+    }
+    if (file.size > 1024 * 1024 * 2) { // 2MB
+      alert('Logo must be smaller than 2MB.');
+      return;
+    }
+    setLogoFile(file);
+    const reader = new FileReader();
+    reader.onload = () => setLogoPreview(reader.result);
+    reader.readAsDataURL(file);
+  };
+
+  const handlePdfChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.type !== 'application/pdf') {
+      alert('Please upload a PDF file for the JD.');
+      return;
+    }
+    if (file.size > 1024 * 1024 * 5) { // 5MB
+      alert('JD PDF must be smaller than 5MB.');
+      return;
+    }
+    setJdPdfFile(file);
+  };
+
   // 🔹 Submit Update
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      if (!loggedInUser || !jd_id) {
+        alert('User or JD missing.');
+        return;
+      }
+
+      // upload files first (if any)
+      const updates = {};
+      if (logoFile) {
+        const storageRef = firebase.storage().ref();
+        const path = `recruiter_logos/${loggedInUser}/${jd_id}/${logoFile.name}`;
+        const snap = await storageRef.child(path).put(logoFile);
+        const url = await snap.ref.getDownloadURL();
+        updates.company_logo_url = url;
+      }
+      if (jdPdfFile) {
+        const storageRef = firebase.storage().ref();
+        const path = `recruiter_jds/${loggedInUser}/${jd_id}/${jdPdfFile.name}`;
+        const snap = await storageRef.child(path).put(jdPdfFile);
+        const url = await snap.ref.getDownloadURL();
+        updates.jd_pdf_url = url;
+      }
+
       await firebase
         .database()
-        .ref(`Recruiters/${loggedInUser}/${jdId}`)
+        .ref(`Recruiters/${loggedInUser}/${jd_id}`)
         .update({
           ...companyDetails,
           placement: formData.placement,
           ...(isInternshipEnabled && { internship: formData.internship }),
+          ...updates,
         });
 
       alert('JD updated successfully!');
@@ -347,25 +455,68 @@ function RecruiterEditJD({ loggedInUser, jdId }) {
         </div>
 
         {/* Placement Selection Process */}
-        <h3>Selection Process (Placement)</h3>
-        <div className="form-group">
-          <label>Assessment Details</label>
-          <input
-            type="text"
-            name="placement.selection_process.assessment_details"
-            value={formData.placement?.selection_process?.assessment_details || ''}
-            onChange={handleFormChange}
-          />
-        </div>
-        <div className="form-group">
-          <label>Expected Timeline</label>
-          <input
-            type="text"
-            name="placement.selection_process.expected_timeline"
-            value={formData.placement?.selection_process?.expected_timeline || ''}
-            onChange={handleFormChange}
-          />
-        </div>
+          <h3>Selection Process (Placement)</h3>
+          <div className="form-group">
+            <label>Assessment Details</label>
+            <input
+              type="text"
+              name="placement.selection_process.assessment_details"
+              value={formData.placement?.selection_process?.assessment_details || ''}
+              onChange={handleFormChange}
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Recruitment Stages</label>
+            {Array.isArray(formData.placement.selection_process.recruitment_stages) &&
+              formData.placement.selection_process.recruitment_stages.map((s, idx) => (
+                <div key={idx} style={{ display: 'flex', gap: '8px', marginBottom: '6px' }}>
+                  <input
+                    type="text"
+                    value={s}
+                    onChange={(e) => updateStage(idx, e.target.value)}
+                    placeholder={`Stage ${idx + 1}`}
+                  />
+                  <button type="button" onClick={() => removeStage(idx)}>Remove</button>
+                </div>
+              ))}
+            <div>
+              <button type="button" onClick={addStage}>Add Stage</button>
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label>Expected Timeline</label>
+            <input
+              type="text"
+              name="placement.selection_process.expected_timeline"
+              value={formData.placement?.selection_process?.expected_timeline || ''}
+              onChange={handleFormChange}
+            />
+          </div>
+
+          {/* File uploads */}
+          <h3>Files</h3>
+          <div className="form-group">
+            <label>Company Logo (image, max 2MB)</label>
+            <input type="file" accept="image/*" onChange={handleLogoChange} />
+            {logoPreview && <img src={logoPreview} alt="logo preview" style={{ width: 120, marginTop: 8 }} />}
+            {!logoPreview && existingLogoUrl && (
+              <div style={{ marginTop: 8 }}>
+                <img src={existingLogoUrl} alt="existing logo" style={{ width: 120 }} />
+              </div>
+            )}
+          </div>
+
+          <div className="form-group">
+            <label>Upload JD PDF (PDF, max 5MB)</label>
+            <input type="file" accept="application/pdf" onChange={handlePdfChange} />
+            {existingJdPdfUrl && (
+              <div style={{ marginTop: 8 }}>
+                <a href={existingJdPdfUrl} target="_blank" rel="noreferrer">View existing JD PDF</a>
+              </div>
+            )}
+          </div>
 
         {/* Internship Toggle */}
         <div className="form-group">

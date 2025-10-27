@@ -1,9 +1,10 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
-    match /Students/{userId}/{allPaths=**} {
-      // User can only read/write inside their own folder
+    // Allow students to read/write only inside their own folder:
+    match /Students/{gradYear}/{branch}/{userId}/{allPaths=**} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
+    // (Keep other rules as needed)
   }
 }

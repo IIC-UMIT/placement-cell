@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import "firebase/compat/auth";
+import 'firebase/compat/storage';
 import firebase from 'firebase/compat/app';
 import { saveAs } from 'file-saver'; // for Excel download
 import * as XLSX from 'xlsx';
@@ -7,7 +8,7 @@ import '../styles/ManageUsers.css';
 
 const sendEmail = async (to, subject, body) => {
   try {
-    const response = await fetch("http://localhost:5000/send-email", {
+    const response = await fetch(" https://tpc-app-1044941932147.asia-south1.run.app/send-email", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email: to, subject, body }), // Ensure correct payload keys
@@ -15,13 +16,23 @@ const sendEmail = async (to, subject, body) => {
 
     const data = await response.json();
     if (!response.ok) {
-      throw new Error(data.error || "Failed to send email");
+      console.error("❌ sendEmail backend error", data);
+      throw new Error(data.error || JSON.stringify(data) || "Failed to send email");
     }
     return true;
   } catch (error) {
-    console.error("❌ Error in sendEmail:", error.message);
+    console.error("❌ Error in sendEmail:", error);
     return false;
   }
+};
+
+// New helper: determine status color from status text
+const getStatusColor = (msg) => {
+  if (!msg) return '#555';
+  const s = String(msg).toLowerCase();
+  if (s.includes('success') || s.includes('done') || s.includes('created')) return 'green';
+  if (s.includes('fail') || s.includes('failed') || s.includes('error')) return 'red';
+  return '#555';
 };
 
 const ExcelUserUploader = ({ sendEmail }) => {
@@ -31,29 +42,59 @@ const ExcelUserUploader = ({ sendEmail }) => {
   // Read Excel
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
+    if (!file) return;
     const reader = new FileReader();
     reader.onload = (event) => {
-      const data = new Uint8Array(event.target.result);
-      const workbook = XLSX.read(data, { type: "array" });
-      const sheetName = workbook.SheetNames[0];
-      const worksheet = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+      try {
+        const data = new Uint8Array(event.target.result);
+        const workbook = XLSX.read(data, { type: "array" });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
 
-      // Validate and format rows
-      const formatted = worksheet.map((row) => {
-        const email = row["Email Id"]?.trim();
-        const name = row["Full name"]?.trim();
-        const rollNo = row["Roll No."]?.toString().trim();
-        const role = row["Role"]?.trim();
+        // Accept common header variants; normalize keys (trim + lowercase)
+        const getCell = (row, names) => {
+          const wanted = names.map(n => n.toLowerCase());
+          for (const key of Object.keys(row)) {
+            const k = String(key).trim().toLowerCase();
+            if (wanted.includes(k)) return String(row[key]).trim();
+          }
+          return undefined;
+        };
 
-        if (!email || !name || !rollNo || !role) {
-          console.warn("⚠️ Skipping invalid row:", row);
-          return null; // Skip invalid rows
-        }
+        const formatted = worksheet.map((row, idx) => {
+          const email = getCell(row, ["Email Id", "Email", "email", "EmailId"]);
+          const name = getCell(row, ["Full name", "Full Name", "Name", "name"]);
+          const rollNoRaw = getCell(row, ["Roll No.", "Roll No", "RollNo", "rollNo"]);
+          const role = getCell(row, ["Role", "role"]);
+          // New: branch and gradYear (allow many header variants)
+          const branch = getCell(row, ["Branch", "branch", "Dept", "Department"]);
+          const gradYear = getCell(row, ["Grad Year", "GradYear", "Graduation Year", "graduation year", "grad_year", "gradyear"]);
 
-        return { email, name, rollNo, role };
-      }).filter(Boolean); // Remove null entries
+          const rollNo = rollNoRaw ? String(rollNoRaw).trim() : undefined;
 
-      setUsers(formatted);
+          const missing = [];
+          if (!email) missing.push('Email');
+          if (!name) missing.push('Name');
+          if (!rollNo) missing.push('RollNo');
+          if (!role) missing.push('Role');
+
+          if (missing.length) {
+            console.warn(`⚠️ Skipping invalid row #${idx + 1}: missing ${missing.join(', ')}`, row);
+            return null;
+          }
+
+          // include branch/gradYear (may be undefined)
+          return { email, name, rollNo, role, branch, gradYear };
+        }).filter(Boolean);
+
+        if (!formatted.length) setStatus('No valid rows found in the uploaded file.');
+        else setStatus(`${formatted.length} valid user(s) parsed from file.`);
+
+        setUsers(formatted);
+      } catch (err) {
+        console.error('Error parsing Excel file:', err);
+        setStatus('Failed to parse the Excel file. Check file format.');
+      }
     };
     reader.readAsArrayBuffer(file);
   };
@@ -78,7 +119,7 @@ const ExcelUserUploader = ({ sendEmail }) => {
       const password = generatePassword(user.name, user.rollNo);
 
       try {
-        const response = await fetch("http://localhost:5000/create-user", {
+        const response = await fetch(" https://tpc-app-1044941932147.asia-south1.run.app/create-user", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -86,6 +127,9 @@ const ExcelUserUploader = ({ sendEmail }) => {
             password,
             name: user.name,
             rollNo: user.rollNo,
+            role: user.role,
+            branch: user.branch || null,      // include branch if provided
+            gradYear: user.gradYear || null,  // include gradYear if provided
           }),
         });
 
@@ -93,7 +137,7 @@ const ExcelUserUploader = ({ sendEmail }) => {
 
         if (data.success) {
           console.log(`✅ User created: ${user.email}`);
-          // Send email with credentials
+          // still send email via /send-email (existing flow) if desired
           const emailSent = await sendEmail(
             user.email,
             "Your IIIC Account Credentials",
@@ -101,9 +145,9 @@ const ExcelUserUploader = ({ sendEmail }) => {
           );
 
           if (emailSent) {
-            results.push({ email: user.email, status: "Created + Email Sent" });
+            results.push({ email: user.email, status: "Created + Email Sent", uid: data.uid || null });
           } else {
-            results.push({ email: user.email, status: "Created but Email Failed" });
+            results.push({ email: user.email, status: "Created but Email Failed", uid: data.uid || null });
           }
         } else {
           console.error(`❌ Failed for ${user.email}:`, data.error);
@@ -123,7 +167,7 @@ const ExcelUserUploader = ({ sendEmail }) => {
     <div>
       <h2>Create Multiple User</h2>
       <p>
-        Upload an Excel file with columns: Email Id, Full name, Roll No., Role. Ensure all fields are filled correctly. 
+        Upload an Excel file with columns: Email Id, Full name, Roll No., Role, Branch, Grad Year. Ensure all fields are filled correctly. 
         <a href="https://docs.google.com/spreadsheets/d/1vhIwD_C_KxNI_kyjWrj1nHsBDSyC5sMaGK5Gluct13U/edit?usp=sharing" target="_blank" rel="noopener noreferrer" style={{ color: 'red', textDecoration: 'underline' }}>
           Link
         </a>
@@ -134,7 +178,7 @@ const ExcelUserUploader = ({ sendEmail }) => {
           Create Users
         </button>
       </div>
-      <p>{status}</p>
+      <p style={{ color: getStatusColor(status) }}>{status}</p> {/* colored status */}
     </div>
   );
 };
@@ -151,6 +195,10 @@ const ManageStudent = () => {
   const [status, setStatus] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const usersPerPage = 10;
+
+  // New states for files
+  const [photoFile, setPhotoFile] = useState(null);
+  const [resumeFile, setResumeFile] = useState(null);
 
   // Fetch users from the database on component mount
   useEffect(() => {
@@ -197,6 +245,20 @@ const ManageStudent = () => {
     setCurrentPage(1);
   }, [searchName, searchRole, users]);
 
+  // Helper: upload a file to Firebase Storage and return download URL
+  const uploadFileToStorage = async (file, destPath) => {
+    if (!file) return null;
+    try {
+      const storageRef = firebase.storage().ref().child(destPath);
+      const snap = await storageRef.put(file);
+      const url = await snap.ref.getDownloadURL();
+      return url;
+    } catch (err) {
+      console.error('Upload to storage failed:', err);
+      return null;
+    }
+  };
+
   // Handle creating a user without logging them in
   const handleCreateUser = async () => {
     if (!name || !email || !password || !role) { // Ensure role is selected
@@ -204,8 +266,31 @@ const ManageStudent = () => {
       return;
     }
 
+    setStatus('Preparing to create user...');
+
     try {
-      // Send request to Flask backend to create user and send email
+      // Upload files first (if any) and capture URLs
+      const timestamp = Date.now();
+      let photoUrl = null;
+      let resumeUrl = null;
+
+      if (photoFile) {
+        const photoPath = `uploads/${role}/photos/${timestamp}_${photoFile.name}`;
+        setStatus('Uploading photo...');
+        photoUrl = await uploadFileToStorage(photoFile, photoPath);
+        if (!photoUrl) console.warn('Photo upload failed, continuing without photo URL');
+      }
+
+      if (resumeFile) {
+        const resumePath = `uploads/${role}/resumes/${timestamp}_${resumeFile.name}`;
+        setStatus('Uploading resume...');
+        resumeUrl = await uploadFileToStorage(resumeFile, resumePath);
+        if (!resumeUrl) console.warn('Resume upload failed, continuing without resume URL');
+      }
+
+      setStatus('Creating user in backend...');
+
+      // Send request to Flask backend to create user and (optionally) send email
       const response = await fetch("http://localhost:5000/create-user", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -215,12 +300,30 @@ const ManageStudent = () => {
           name,
           rollNo: "N/A", // Add rollNo if applicable
           role, // Include role in the payload
+          photoUrl, // include links to uploaded files so backend (if needed) can store them too
+          resumeUrl,
         }),
       });
 
       const data = await response.json();
 
       if (data.success) {
+        // Use returned uid if present; otherwise sanitize email to use as key
+        const key = data.uid || email.replace(/\./g, ',');
+        // Save user metadata in Realtime Database
+        try {
+          await firebase.database().ref(`users/${role}/${key}`).set({
+            name,
+            email,
+            role,
+            photo: photoUrl || null,
+            resume: resumeUrl || null,
+            createdOn: firebase.database.ServerValue.TIMESTAMP,
+          });
+        } catch (dbErr) {
+          console.error('Failed to write to realtime DB:', dbErr);
+        }
+
         alert(`User created successfully: ${email}`);
       } else {
         alert(`Failed to create user: ${data.error}`);
@@ -231,9 +334,13 @@ const ManageStudent = () => {
       setEmail('');
       setPassword('');
       setRole(''); // Reset role
+      setPhotoFile(null);
+      setResumeFile(null);
+      setStatus('Done');
     } catch (error) {
       console.error('Error creating user:', error);
       alert('An error occurred while creating the user.');
+      setStatus('Error during creation');
     }
   };
 
@@ -287,11 +394,14 @@ const ManageStudent = () => {
           <option value="Recruiter">Recruiter</option>
           <option value="Coordinator">Coordinator</option>
         </select>
+
         <button className="submit-button" onClick={handleCreateUser}>Create User</button>
         <button className="export-button" onClick={exportToExcel}>Download Excel</button>
       </div>
 
-      <div className="searchbar-container flex align-items-center" style={{ width: '100%', gap: '10px' }}>
+      <div style={{ marginTop: 8, color: getStatusColor(status) }}>{status}</div> {/* colored status */}
+
+      <div className="searchbar-container d-flex align-items-center" style={{ width: '100%', gap: '10px' }}>
         <input
           className="search-field"
           type="text"
@@ -338,7 +448,6 @@ const ManageStudent = () => {
             <th>Email</th>
             <th>Role</th>
             <th>Created On</th>
-            <th>Created By</th>
           </tr>
         </thead>
         <tbody>
@@ -349,7 +458,6 @@ const ManageStudent = () => {
                 <td>{user.email}</td>
                 <td>{user.role || 'N/A'}</td>
                 <td>{user.createdOn || 'N/A'}</td>
-                <td>{user.createdBy || 'N/A'}</td>
               </tr>
             ))
           ) : (
