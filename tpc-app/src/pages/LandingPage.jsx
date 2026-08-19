@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { getDatabase, ref, get } from "firebase/database";
 import '../styles/LandingPage.css';
 import BranchWise from "../components/BranchWise";
+import BranchCTCBoxPlot from "../components/Branchctcboxplot";
 import CtcHighlight from "../components/CtcHighlight";
 import InternshipStatistics from '../components/InternshipStat';
 import YearlyPlaced from '../components/YearlyPlaced';
@@ -159,7 +160,7 @@ function Home() {
           </div>
         </div>
 
-        {/* COMPANY LOGO */}
+     {/*  COMPANY LOGO 
         <div className="slider">
           <div className="slider-text">
             <h1><b>Our Industry Recruiters</b></h1>
@@ -172,7 +173,8 @@ function Home() {
             ))}
           </div>
         </div>
-
+     */}   
+     
         {/* ABOUT US */}
         <div className="about-container">
           <div className='about-content'>
@@ -188,9 +190,7 @@ function Home() {
         </div>
 
         {/* STATISTICS */}
-       {/* ================= STATISTICS SECTION ================= */}
-{
-/* STATISTICS */}
+        {/* ================= STATISTICS SECTION ================= */}
         <div className="container-counter">
           <div className="counters">
             <div>
@@ -204,36 +204,44 @@ function Home() {
           </div>
         </div>
 
-        <div className="layout">
-          <div className="charts-grid">
-            <div className="line-chart-container">
-              <h2>Ctc Highlight</h2>
-              {/* <Line data={lineData} options={{ scales: { y: { beginAtZero: true } } }} /> */}
+        {/* ── Row 1: CTC chart (wider) + Branch-wise donut ── */}
+        <div className="stats-row stats-row-1">
+          <div className="stat-card ctc-card">
+            <h2>CTC Highlights</h2>
+            <div className="chart-inner">
               <CtcHighlight />
             </div>
-            <div className="barlayout flex flex-direction mt-3" style={{ gap: "20px" }}>
-              <div className="chart-container">
-              <h2>Internship Offers</h2>
-              <InternshipStatistics />
-              </div>
-              <div className="chart-container">
-                <h2>Yearly Placements</h2>
-                {/* <Bar data={barData} options={{ scales: { y: { beginAtZero: true } } }} /> */}
-                
-                <YearlyPlaced />
-              </div>
-            </div>
           </div>
-          <div className="dougnut-chart-container">
+          <div className="stat-card donut-card">
             <h2>Branch-wise Placements</h2>
-            {/* <Doughnut data={doughnutData} width="200px" height="200px" /> */}
-            <BranchWise />
+            <div className="chart-inner">
+              <BranchWise />
+            </div>
           </div>
         </div>
 
-
+        {/* ── Row 2: Internship | Box Plot | Yearly ── */}
+        <div className="stats-row stats-row-2">
+          <div className="stat-card">
+            <h2>Internship Offers</h2>
+            <div className="chart-inner">
+              <InternshipStatistics />
+            </div>
+          </div>
+          <div className="stat-card">
+            <h2>Branch × CTC</h2>
+            <div className="chart-inner">
+              <BranchCTCBoxPlot />
+            </div>
+          </div>
+          <div className="stat-card">
+            <h2>Yearly Placements</h2>
+            <div className="chart-inner">
+              <YearlyPlaced />
+            </div>
+          </div>
+        </div>
         
-
         {/* HIGHEST PLACED */}
         <section className="top-students">
           <div className="d-flex flex-wrap gap-3 p-3 justify-content-center">
@@ -242,22 +250,15 @@ function Home() {
                 key={index}
                 className="position-relative p-3 shadow-lg student-card"
               >
-                {/* Expanding Circle Effect */}
                 <div className="expanding-circle"></div>
-
-                {/* Card Content */}
                 <div className="d-flex flex-column h-100 justify-content-between position-relative z-1">
                   <div>
                     <h2 className="fs-4 fw-bold mb-2">{student.name}</h2>
-                    {/* <p className="text-secondary color-white">{student.company}</p> */}
                   </div>
                   <div className="mt-3">
                     <p><strong>Package:</strong> {student.packageAmount}</p>
-                    {/* <p><strong>Company:</strong> {student.company}</p> */}
                   </div>
                 </div>
-
-                {/* Overlay with Quotes on Hover */}
                 <div className="overlay d-flex align-items-flex-start justify-content-center">
                   <div className="text-center mt-3">
                     <p className="fw-medium">"{student.quote}"</p>

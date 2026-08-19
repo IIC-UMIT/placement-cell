@@ -43,6 +43,12 @@ const YearlyPlaced = () => {
 
   const options = {
     responsive: true,
+     layout: {
+    padding: {
+      top: 20,    // ← add this — gives breathing room so top points aren't clipped
+      right: 10,
+    }
+  },
     plugins: {
       legend: {
         display: false,
@@ -72,7 +78,7 @@ const YearlyPlaced = () => {
   };
 
   return (
-    <div style={{ width: "90%", margin: "auto" }}>
+    <div style={{ width: "90%", margin: "auto", paddingTop: "8px" }}>
       <Line data={data} options={options} />
     </div>
   );

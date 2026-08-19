@@ -1,242 +1,100 @@
-// import { Bar } from "react-chartjs-2";
-// import {
-//   Chart as ChartJS,
-//   CategoryScale,
-//   LinearScale,
-//   BarElement,
-//   Title,
-//   Tooltip,
-//   Legend,
-// } from "chart.js";
-
-// ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
-
-// const CTCBarChart = ({ data }) => {
-//   const chartData = {
-//     labels: data.map((item) => item.company),
-//     datasets: [
-//       {
-//         label: "CTC (LPA)",
-//         data: data.map((item) => item.ctc),
-//         backgroundColor: "#003049",
-//         borderColor: "#003049",
-//         borderWidth: 2,
-//         borderRadius: 6,
-//         maxBarThickness: 28,
-//       },
-//     ],
-//   };
-
-//   const options = {
-//   responsive: true,
-//   plugins: {
-//     legend: { display: false },
-//     tooltip: {
-//       callbacks: {
-//         label: function (tooltipItem) {
-//           const students = data[tooltipItem.dataIndex].students;
-//           return `CTC: ${tooltipItem.raw} LPA, Students: ${students}`;
-//         },
-//       },
-//     },
-//   },
-//   scales: {
-//     x: {
-//       display: true,
-//       ticks: {
-//         display: false,
-//         padding: 12,
-//         maxRotation: 75,
-//         minRotation: 45,
-//       },
-//       grid: { display: false },
-//       barPercentage: 2.0,
-//       categoryPercentage: 5.0,
-//     },
-//     y: {
-//       beginAtZero: true,
-//       min: 0,
-//       max: 35,
-//       ticks: {
-//         stepSize: 2,
-//         color: "#003049",
-//         font: { size: 12 },
-//       },
-//       title: {
-//         display: true,
-//         text: "CTC Offered (LPA)",
-//         color: "#003049",
-//         font: { size: 14 },
-//       },
-//       grid: {
-//         color: "#e5e7eb",
-//         borderDash: [2, 4],
-//       },
-//     },
-//   },
-// };
-
-
-//   return (
-//     <div style={{ maxWidth: 1200, width: "100%", height: 240 }}>
-//       <Bar data={chartData} options={options} height={240} />
-//     </div>
-//   );
-// };
-
-// const App = () => {
-//   const companyData = [
-//     { company: "Oracle", ctc: 1, students: 1 },
-//     { company: "Deutsche Bank", ctc: 7, students: 7 },
-//     { company: "JP Morgan Chase & Co.", ctc: 19.75, students: 1 },
-//     { company: "VISA", ctc: 32.76, students: 4 },
-//     { company: "Barclays", ctc: 12.49, students: 13 },
-//     { company: "KPMG", ctc: 5, students: 7 },
-//     { company: "Deloitte USI", ctc: 7.6, students: 16 },
-//     { company: "Bank of America", ctc: 6.45, students: 34 },
-//     { company: "Deloitte IN", ctc: 7.6, students: 14 },
-//     { company: "Rite Technologies", ctc: 4.4, students: 1 },
-//     { company: "NetWeaver", ctc: 4.5, students: 4 },
-//     { company: "Amdocs", ctc: 5.3, students: 12 },
-//     { company: "Accenture", ctc: 4.5, students: 5 },
-//     { company: "Publicis Sapient", ctc: 4.58, students: 9 },
-//     { company: "HSBC", ctc: 9, students: 2 },
-//     { company: "Capgemini", ctc: 4.25, students: 19 },
-//     { company: "ExcelR", ctc: 6, students: 2 },
-//     { company: "Argon & Co.", ctc: 4, students: 1 },
-//     { company: "IIDE", ctc: 7.2, students: 10 },
-//     { company: "Eduvanz", ctc: 6, students: 2 },
-//     { company: "Colgate Palmolive", ctc: 2, students: 2 },
-//     { company: "CleverTap", ctc: 6, students: 1 },
-//   ];
-
-//   return (
-//     <div>
-//       <CTCBarChart data={companyData} />
-//     </div>
-//   );
-// };
-
-// export default App;
-
-
-import { Bar } from "react-chartjs-2";
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-} from "chart.js";
+  BarChart, Bar, XAxis, YAxis, Tooltip,
+  ResponsiveContainer, Cell, CartesianGrid
+} from "recharts";
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+const data = [
+  { company: "NVIDIA",            ctc: 40 },
+  { company: "Google",            ctc: 32 },
+  { company: "Microsoft",         ctc: 28 },
+  { company: "Amazon",            ctc: 22 },
+  { company: "JP Morgan",         ctc: 18 },
+  { company: "GE Aerospace",      ctc: 14 },
+  { company: "Visa",              ctc: 32 },
+  { company: "Capgemini",         ctc: 8  },
+  { company: "Infosys",           ctc: 7  },
+  { company: "TCS",               ctc: 7  },
+  { company: "Wipro",             ctc: 6  },
+  { company: "Cognizant",         ctc: 5  },
+  { company: "KPMG",              ctc: 8  },
+  { company: "Siemens",           ctc: 6  },
+  { company: "Colgate Palmolive", ctc: 6  },
+];
 
-const CTCBarChart = ({ data }) => {
-  const chartData = {
-    labels: data.map((item) => item.company),
-    datasets: [
-      {
-        label: "CTC (LPA)",
-        data: data.map((item) => item.ctc),
-        backgroundColor: "#003049",
-        borderColor: "#003049",
-        borderWidth: 2,
-        borderRadius: 6,
-        maxBarThickness: 28,
-      },
-    ],
-  };
+const CustomTooltip = ({ active, payload }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div style={{
+        background: "rgba(0,0,0,0.75)",
+        borderRadius: "6px",
+        padding: "6px 10px",
+        border: "none",
+      }}>
+        <p style={{ color: "#fff", margin: 0, fontSize: 11, fontWeight: 600 }}>
+          {payload[0].payload.company}
+        </p>
+        <p style={{ color: "#5FA8D3", margin: "2px 0 0", fontSize: 11 }}>
+          {payload[0].value} LPA
+        </p>
+      </div>
+    );
+  }
+  return null;
+};
 
-  const options = {
-    responsive: true,
-    maintainAspectRatio: false, // prevents blur scaling
-    plugins: {
-      legend: { display: false },
-      tooltip: {
-        callbacks: {
-          label: function (tooltipItem) {
-            const students = data[tooltipItem.dataIndex].students;
-            return `CTC: ${tooltipItem.raw} LPA, Students: ${students}`;
-          },
-        },
-      },
-    },
-    scales: {
-      x: {
-        display: true,
-        ticks: {
-          display: false,
-          padding: 12,
-          maxRotation: 75,
-          minRotation: 45,
-        },
-        grid: { display: false },
-        barPercentage: 0.8,
-        categoryPercentage: 0.6,
-      },
-      y: {
-        beginAtZero: true,
-        min: 0,
-        max: 35,
-        ticks: {
-          stepSize: 2,
-          color: "#003049",
-          font: { size: 12 },
-        },
-        title: {
-          display: true,
-          text: "CTC Offered (LPA)",
-          color: "#003049",
-          font: { size: 14 },
-        },
-        grid: {
-          color: "#e5e7eb",
-          borderDash: [2, 4],
-        },
-      },
-    },
-  };
-
+const CtcHighlight = ({ activeIndex, setActiveIndex }) => {
   return (
-    <div style={{ maxWidth: "1200px", height: "320px" }}>
-      <Bar data={chartData} options={options} />
+    <div style={{ width: "100%", height: "100%" }}>
+      <ResponsiveContainer width="100%" height={260}>
+        <BarChart
+          data={data}
+          margin={{ top: 8, right: 12, left: -20, bottom: 8 }}
+        >
+          <CartesianGrid
+            vertical={false}
+            stroke="#e0e0e0"
+            strokeDasharray="3 3"
+          />
+          <XAxis
+            dataKey="company"
+            tick={false}
+            axisLine={false}
+            tickLine={false}
+          />
+          <YAxis
+            tick={false}          
+            axisLine={false}
+            tickLine={false}
+            label={null}          
+          />
+          <Tooltip
+            content={<CustomTooltip />}
+            cursor={false}         
+          />
+          <Bar
+            dataKey="ctc"
+            radius={[4, 4, 0, 0]}
+            barSize={18}
+            maxBarSize={24}
+            onMouseEnter={(_, index) => setActiveIndex?.(index)}
+            onMouseLeave={() => setActiveIndex?.(null)}
+          >
+            {data.map((_, i) => (
+              <Cell
+                key={i}
+                fill="#003049"
+                fillOpacity={
+                  activeIndex === null || activeIndex === undefined || activeIndex === i
+                    ? 1
+                    : 0.35        
+                }
+              />
+            ))}
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
     </div>
   );
 };
 
-const App = () => {
-  const companyData = [
-    { company: "Oracle", ctc: 1, students: 1 },
-    { company: "Deutsche Bank", ctc: 7, students: 7 },
-    { company: "JP Morgan Chase & Co.", ctc: 19.75, students: 1 },
-    { company: "VISA", ctc: 32.76, students: 4 },
-    { company: "Barclays", ctc: 12.49, students: 13 },
-    { company: "KPMG", ctc: 5, students: 7 },
-    { company: "Deloitte USI", ctc: 7.6, students: 16 },
-    { company: "Bank of America", ctc: 6.45, students: 34 },
-    { company: "Deloitte IN", ctc: 7.6, students: 14 },
-    { company: "Rite Technologies", ctc: 4.4, students: 1 },
-    { company: "NetWeaver", ctc: 4.5, students: 4 },
-    { company: "Amdocs", ctc: 5.3, students: 12 },
-    { company: "Accenture", ctc: 4.5, students: 5 },
-    { company: "Publicis Sapient", ctc: 4.58, students: 9 },
-    { company: "HSBC", ctc: 9, students: 2 },
-    { company: "Capgemini", ctc: 4.25, students: 19 },
-    { company: "ExcelR", ctc: 6, students: 2 },
-    { company: "Argon & Co.", ctc: 4, students: 1 },
-    { company: "IIDE", ctc: 7.2, students: 10 },
-    { company: "Eduvanz", ctc: 6, students: 2 },
-    { company: "Colgate Palmolive", ctc: 2, students: 2 },
-    { company: "CleverTap", ctc: 6, students: 1 },
-  ];
-
-  return (
-    <div>
-      <CTCBarChart data={companyData} />
-    </div>
-  );
-};
-
-export default App;
+export default CtcHighlight;
