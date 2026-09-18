@@ -3,14 +3,13 @@ import { useNavigate, Link } from 'react-router-dom';
 import { getDatabase, ref, get } from "firebase/database";
 import '../styles/LandingPage.css';
 import BranchWise from "../components/BranchWise";
-import BranchCTCBoxPlot from "../components/Branchctcboxplot";
+
 import CtcHighlight from "../components/CtcHighlight";
 import InternshipStatistics from '../components/InternshipStat';
 import YearlyPlaced from '../components/YearlyPlaced';
 
 function Home() {
   const navigate = useNavigate();
-  const [logos, setLogos] = useState([]);
   const [activated, setActivated] = useState(false);
   const [counters, setCounters] = useState([
     { label: "Student Placed", count: 167, value: 0 },
@@ -37,25 +36,7 @@ function Home() {
       packageAmount: "INR 32 LPA",
       company: "Visa",
     },
-  ];
-
-  useEffect(() => {
-    const fetchLogos = async () => {
-      const db = getDatabase();
-      const logosRef = ref(db, "CompanyLogos"); // Adjust path if necessary
-
-      try {
-        const snapshot = await get(logosRef);
-        if (snapshot.exists()) {
-          setLogos(Object.values(snapshot.val())); // Convert object to array
-        }
-      } catch (error) {
-        console.error("Error fetching logos:", error);
-      }
-    };
-
-    fetchLogos();
-  }, []);
+    ];
 
   const updateCount = (index) => {
     setCounters(prevCounters => {
@@ -160,20 +141,7 @@ function Home() {
           </div>
         </div>
 
-     {/*  COMPANY LOGO 
-        <div className="slider">
-          <div className="slider-text">
-            <h1><b>Our Industry Recruiters</b></h1>
-          </div>
-          <div className="slide-track">
-            {logos.concat(logos).concat(logos).map((logo, index) => ( // Duplicate for smooth scrolling
-              <div className="slide" key={index}>
-                <img className="move" src={logo} alt={`Company Logo ${index + 1}`} />
-              </div>
-            ))}
-          </div>
-        </div>
-     */}   
+     {}   
      
         {/* ABOUT US */}
         <div className="about-container">
@@ -228,12 +196,7 @@ function Home() {
               <InternshipStatistics />
             </div>
           </div>
-          <div className="stat-card">
-            <h2>Branch × CTC</h2>
-            <div className="chart-inner">
-              <BranchCTCBoxPlot />
-            </div>
-          </div>
+    
           <div className="stat-card">
             <h2>Yearly Placements</h2>
             <div className="chart-inner">

@@ -1,5 +1,7 @@
 {
   "projects": {
     "default": "iiic-umit"
-  }
+  },
+  "targets": {},
+  "etags": {}
 }

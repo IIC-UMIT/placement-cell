@@ -321,7 +321,7 @@ nav {
 /* Row 2 — three equal-height columns */
 .stats-row-2 {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 14px;
   padding: 0 60px;
   margin-bottom: 24px;
