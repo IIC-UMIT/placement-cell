@@ -1,0 +1,337 @@
+/* =========================================
+   TEAM CARD
+========================================= */
+
+.meet-team-card {
+    position: relative;
+
+    width: 100%;
+    height: 100%;
+
+    background: #ffffff;
+
+    border: 1px solid #d9e4ea;
+    border-radius: 22px;
+
+    overflow: hidden;
+
+    display: flex;
+    flex-direction: column;
+
+    box-sizing: border-box;
+
+    box-shadow:
+        0 8px 24px rgba(7, 59, 87, 0.10);
+
+    transition:
+        transform 0.35s ease,
+        box-shadow 0.35s ease,
+        border-color 0.35s ease;
+}
+
+
+/* =========================================
+   TOP GRADIENT BORDER
+========================================= */
+
+.meet-team-card::before {
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 5px;
+
+    background: linear-gradient(
+        90deg,
+        #073b57,
+        #2878d4,
+        #6fa9c8
+    );
+
+    z-index: 5;
+}
+
+
+/* =========================================
+   HOVER
+========================================= */
+
+.meet-team-card:hover {
+    transform: translateY(-6px);
+
+    border-color: #b9d8e8;
+
+    box-shadow:
+        0 16px 35px rgba(7, 59, 87, 0.17);
+}
+
+
+/* =========================================
+   PHOTO CONTAINER
+========================================= */
+
+.team-photo-div {
+    width: 100%;
+
+    /* Flex-grow allows image container to fill available height */
+    flex: 1 1 auto;
+
+    padding: 10px 10px 8px;
+
+    box-sizing: border-box;
+
+    background: #ffffff;
+
+    overflow: hidden;
+}
+
+
+/* =========================================
+   PHOTO
+========================================= */
+
+.team-photo {
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+
+    display: block;
+
+    border-radius: 2px;
+
+    transition:
+        transform 0.45s ease;
+}
+
+
+/* =========================================
+   PHOTO HOVER
+========================================= */
+
+.meet-team-card:hover .team-photo {
+    transform: scale(1.025);
+}
+
+
+/* =========================================
+   NAME SECTION
+========================================= */
+
+.team-name-div {
+    width: 100%;
+
+    /* Reduced height and padding for a compact bottom area */
+    height: auto;
+    min-height: unset;
+
+    padding: 10px 10px 18px;
+
+    box-sizing: border-box;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    text-align: center;
+
+    background: #ffffff;
+
+    flex-shrink: 0;
+}
+
+
+/* =========================================
+   NAME
+========================================= */
+
+.team-name {
+    margin: 0;
+
+    width: 100%;
+
+    color: #073b57;
+
+    font-size: 19px;
+
+    font-weight: 600;
+
+    line-height: 1.2;
+
+    text-align: center;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+}
+
+
+/* =========================================
+   TEAM INFO
+========================================= */
+
+.team-info {
+    width: 100% !important;
+
+    flex: 0 0 auto !important;
+
+    display: flex !important;
+
+    flex-direction: column !important;
+
+    align-items: center !important;
+
+    justify-content: center !important;
+
+    text-align: center;
+
+    padding: 0 10px 8px !important;
+
+    margin: 0 !important;
+
+    min-height: 0 !important;
+
+    background: #ffffff;
+
+    overflow: hidden !important;
+
+    box-sizing: border-box;
+}
+
+
+/* =========================================
+   ROLE
+========================================= */
+
+.team-role {
+    margin-top: 3px !important;
+
+    margin-bottom: 0 !important;
+
+    display: inline-block;
+
+    padding: 2px 9px;
+
+    background: #f0f6fc;
+
+    color: #2878d4;
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+    border-radius: 12px;
+
+    border: 1px solid #d4e7f5;
+
+    line-height: 1.2;
+}
+
+
+/* =========================================
+   LARGE DESKTOP
+========================================= */
+
+@media (min-width: 1400px) {
+
+    .team-photo-div {
+        padding: 20px 20px 8px;
+    }
+
+    .team-name-div {
+        height: auto;
+        min-height: unset;
+
+        padding: 12px 10px 20px;
+    }
+
+}
+
+
+/* =========================================
+   MEDIUM DESKTOP
+========================================= */
+
+@media (max-width: 1399px) and (min-width: 1001px) {
+
+    .team-photo-div {
+        padding: 18px 18px 8px;
+    }
+
+    .team-name-div {
+        height: auto;
+        min-height: unset;
+
+        padding: 10px 10px 18px;
+    }
+
+}
+
+
+/* =========================================
+   TABLET
+========================================= */
+
+@media (max-width: 1000px) {
+
+    .team-photo-div {
+        padding: 15px 15px 7px;
+    }
+
+    .team-name-div {
+        height: auto;
+        min-height: unset;
+
+        padding: 10px 8px 16px;
+    }
+
+    .team-name {
+        font-size: 17px;
+    }
+
+    .team-role {
+        font-size: 11px;
+    }
+
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 500px) {
+
+    .meet-team-card {
+        border-radius: 18px;
+    }
+
+    .team-photo-div {
+        padding: 12px 12px 6px;
+    }
+
+    .team-name-div {
+        height: auto;
+        min-height: unset;
+
+        padding: 8px 7px 14px;
+    }
+
+    .team-name {
+        font-size: 16px;
+    }
+
+    .team-role {
+        font-size: 10px;
+
+        padding: 2px 8px;
+    }
+
+}

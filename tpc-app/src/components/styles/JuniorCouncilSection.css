@@ -1,0 +1,385 @@
+/* =========================================
+   JUNIOR COUNCIL SECTION
+========================================= */
+
+.junior-section {
+    width: 100%;
+    padding: 60px 0 80px;
+    overflow: hidden;
+}
+
+
+/* =========================================
+   HEADING
+========================================= */
+
+.section-heading {
+    text-align: center;
+    margin-bottom: 0px; /* Reduced to pull carousel up */
+}
+
+.section-heading span {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: #2878d4;
+}
+
+.section-heading h2 {
+    margin: 8px 0 10px;
+    font-size: 38px;
+    color: #073b57;
+}
+
+.section-heading p {
+    max-width: 650px;
+    margin: 0 auto 5px; /* Reduced bottom margin from 25px to 5px */
+    color: #666;
+    line-height: 1.6;
+}
+
+
+/* =========================================
+   VIEW BUTTON
+========================================= */
+
+.view-btn {
+    border: none;
+    background: #073b57;
+    color: white;
+    padding: 13px 25px;
+    border-radius: 30px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+.view-btn:hover {
+    background: #0b5275;
+}
+
+
+/* =========================================
+   CAROUSEL
+========================================= */
+
+.jc-carousel {
+    position: relative;
+    width: 100%;
+    max-width: 1600px;
+    height: 480px; /* Adjusted height to fit tighter vertical alignment */
+    margin: 0 auto; /* Removed top margin */
+    overflow: hidden;
+} 
+
+
+/* =========================================
+   VIEWPORT
+========================================= */
+
+.jc-viewport {
+    margin-top: 0px; /* Removed 10px top margin */
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    /* Centered symmetrically */
+    transform: translateX(0);
+}
+
+
+/* =========================================
+   CARD BASE
+========================================= */
+
+.jc-card {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 320px;
+    height: 430px;
+    cursor: pointer;
+    transform-origin: center center;
+    transition:
+        transform 0.5s cubic-bezier(0.34, 1.2, 0.64, 1),
+        opacity 0.5s ease,
+        filter 0.5s ease;
+    user-select: none;
+}
+
+
+/* =========================================
+   CENTER
+========================================= */
+
+.jc-card.center {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+    z-index: 10;
+    filter: none;
+}
+
+
+/* =========================================
+   LEFT 1 & RIGHT 1
+========================================= */
+
+.jc-card.left-1 {
+    transform: translate(-50%, -50%) translateX(-330px) scale(0.82);
+    opacity: 0.90;
+    z-index: 8;
+    filter: brightness(0.97);
+}
+
+.jc-card.right-1 {
+    transform: translate(-50%, -50%) translateX(330px) scale(0.82);
+    opacity: 0.90;
+    z-index: 8;
+    filter: brightness(0.97);
+}
+
+
+/* =========================================
+   LEFT 2 & RIGHT 2
+========================================= */
+
+.jc-card.left-2 {
+    transform: translate(-50%, -50%) translateX(-590px) scale(0.65);
+    opacity: 0.68;
+    z-index: 6;
+    filter: brightness(0.93);
+}
+
+.jc-card.right-2 {
+    transform: translate(-50%, -50%) translateX(590px) scale(0.65);
+    opacity: 0.68;
+    z-index: 6;
+    filter: brightness(0.93);
+}
+
+
+/* =========================================
+   HIDDEN
+========================================= */
+
+.jc-card.hidden {
+    transform: translate(-50%, -50%) scale(0.5);
+    opacity: 0;
+    z-index: 0;
+    pointer-events: none;
+}
+
+
+/* =========================================
+   ARROWS
+========================================= */
+
+.jc-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: none;
+    background: #073b57;
+    color: white;
+    font-size: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 30;
+    transition: background 0.25s ease, transform 0.25s ease;
+}
+
+.jc-arrow:hover {
+    background: #2878d4;
+    transform: translateY(-50%) scale(1.08);
+}
+
+.jc-prev {
+    left: 15px;
+}
+
+.jc-next {
+    right: 15px;
+}
+
+
+/* =========================================
+   LARGE DESKTOP
+========================================= */
+
+@media (min-width: 1400px) {
+
+    .jc-viewport {
+        transform: translateX(0);
+    }
+
+    .jc-card {
+        width: 340px;
+        height: 430px;
+    }
+
+    .jc-card.left-1 {
+        transform: translate(-50%, -50%) translateX(-360px) scale(0.82);
+    }
+
+    .jc-card.right-1 {
+        transform: translate(-50%, -50%) translateX(360px) scale(0.82);
+    }
+
+    .jc-card.left-2 {
+        transform: translate(-50%, -50%) translateX(-640px) scale(0.65);
+    }
+
+    .jc-card.right-2 {
+        transform: translate(-50%, -50%) translateX(640px) scale(0.65);
+    }
+}
+
+
+/* =========================================
+   MEDIUM DESKTOP
+========================================= */
+
+@media (max-width: 1399px) and (min-width: 1001px) {
+
+    .jc-viewport {
+        transform: translateX(0);
+    }
+
+    .jc-card {
+        width: 300px;
+        height: 410px;
+    }
+
+    .jc-card.left-1 {
+        transform: translate(-50%, -50%) translateX(-310px) scale(0.82);
+    }
+
+    .jc-card.right-1 {
+        transform: translate(-50%, -50%) translateX(310px) scale(0.82);
+    }
+
+    .jc-card.left-2 {
+        transform: translate(-50%, -50%) translateX(-550px) scale(0.65);
+    }
+
+    .jc-card.right-2 {
+        transform: translate(-50%, -50%) translateX(550px) scale(0.65);
+    }
+}
+
+
+/* =========================================
+   TABLET
+========================================= */
+
+@media (max-width: 1000px) and (min-width: 751px) {
+
+    .jc-carousel {
+        height: 460px;
+    }
+
+    .jc-viewport {
+        transform: translateX(0);
+    }
+
+    .jc-card {
+        width: 280px;
+        height: 390px;
+    }
+
+    .jc-card.left-1 {
+        transform: translate(-50%, -50%) translateX(-270px) scale(0.8);
+    }
+
+    .jc-card.right-1 {
+        transform: translate(-50%, -50%) translateX(270px) scale(0.8);
+    }
+
+    .jc-card.left-2 {
+        transform: translate(-50%, -50%) translateX(-460px) scale(0.62);
+    }
+
+    .jc-card.right-2 {
+        transform: translate(-50%, -50%) translateX(460px) scale(0.62);
+    }
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 750px) {
+
+    .jc-carousel {
+        height: 420px;
+    }
+
+    .jc-viewport {
+        transform: translateX(0);
+    }
+
+    .jc-card {
+        width: 270px;
+        height: 380px;
+    }
+
+    .jc-card.left-2,
+    .jc-card.right-2 {
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .jc-card.left-1 {
+        transform: translate(-50%, -50%) translateX(-180px) scale(0.75);
+        opacity: 0.6;
+    }
+
+    .jc-card.right-1 {
+        transform: translate(-50%, -50%) translateX(180px) scale(0.75);
+        opacity: 0.6;
+    }
+}
+
+
+/* =========================================
+   SMALL MOBILE
+========================================= */
+
+@media (max-width: 500px) {
+
+    .jc-carousel {
+        height: 400px;
+    }
+
+    .jc-viewport {
+        transform: translateX(0);
+    }
+
+    .jc-card {
+        width: 250px;
+        height: 360px;
+    }
+
+    .jc-card.left-1 {
+        transform: translate(-50%, -50%) translateX(-140px) scale(0.7);
+        opacity: 0.4;
+    }
+
+    .jc-card.right-1 {
+        transform: translate(-50%, -50%) translateX(140px) scale(0.7);
+        opacity: 0.4;
+    }
+
+    .jc-arrow {
+        width: 40px;
+        height: 40px;
+        font-size: 22px;
+    }
+}

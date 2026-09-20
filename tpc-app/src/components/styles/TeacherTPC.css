@@ -1,0 +1,134 @@
+/* =========================================
+   TEACHER COORDINATORS SECTION
+========================================= */
+
+.teacher-tpc-section {
+    width: 100%;
+    padding: 60px 0 80px;
+    overflow: hidden;
+}
+
+
+/* =========================================
+   HEADING
+========================================= */
+
+.teacher-section-heading {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.teacher-section-heading span {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: #2878d4;
+}
+
+.teacher-section-heading h2 {
+    margin: 8px 0 10px;
+    font-size: 38px;
+    color: #073b57;
+}
+
+.teacher-section-heading p {
+    max-width: 650px;
+    margin: 0 auto 25px;
+    color: #666;
+    line-height: 1.6;
+}
+
+
+/* =========================================
+   VIEW BUTTON
+========================================= */
+
+.teacher-view-btn {
+    border: none;
+    background: #073b57;
+    color: white;
+    padding: 13px 25px;
+    border-radius: 30px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+.teacher-view-btn:hover {
+    background: #0b5275;
+}
+
+
+/* =========================================
+   SINGLE ROW CONTAINER
+========================================= */
+
+.teacher-row-container {
+    width: 100%;
+    max-width: 1400px;
+    margin: 30px auto 0;
+    padding: 0 20px;
+    box-sizing: border-box;
+    overflow-x: auto; /* Enables horizontal scroll if screen is too narrow for all 4 cards */
+}
+
+.teacher-row {
+    display: flex;
+    flex-wrap: nowrap; /* Forces all cards into one single row */
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+}
+
+
+/* =========================================
+   CARD ITEM
+========================================= */
+
+.teacher-card {
+    /* Set flex-basis so 4 cards fit evenly across the row */
+    flex: 0 0 calc(25% - 15px);
+    max-width: 300px;
+    min-width: 240px;
+    height: 400px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.teacher-card:hover {
+    transform: translateY(-6px);
+
+    border-color: #b9d8e8;
+
+    box-shadow:
+        0 16px 35px rgba(7, 59, 87, 0.17);
+}
+
+
+/* =========================================
+   NO TEACHERS
+========================================= */
+
+.no-teachers {
+    text-align: center;
+    color: #666;
+    margin-top: 40px;
+}
+
+
+/* =========================================
+   RESPONSIVE ADJUSTMENTS
+========================================= */
+
+@media (max-width: 1100px) {
+    .teacher-row {
+        justify-content: flex-start; /* Allows smooth scrolling on smaller screens */
+    }
+
+    .teacher-card {
+        flex: 0 0 260px;
+        height: 380px;
+    }
+}
