@@ -1,0 +1,85 @@
+.meet-navbar{
+    position:sticky;
+    top:0;
+    left:0;
+
+    width:100%;
+    height:80px;
+
+    background:#ffffff;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    padding:0 60px;
+
+    box-shadow:0 5px 20px rgba(0,0,0,.08);
+
+    z-index:1000;
+}
+
+.meet-navbar-left{
+    display:flex;
+    align-items:center;
+    gap:18px;
+}
+
+.meet-logo{
+    width:58px;
+    height:58px;
+    object-fit:contain;
+}
+
+.meet-title{
+    display:flex;
+    flex-direction:column;
+}
+
+.meet-title h2{
+    color:#003049;
+    font-size:22px;
+    font-weight:700;
+    margin:0;
+}
+
+.meet-title span{
+    color:#666;
+    font-size:14px;
+}
+
+.meet-navbar-right{
+    display:flex;
+    align-items:center;
+}
+
+.home-btn{
+    border:none;
+    outline:none;
+
+    padding:12px 28px;
+
+    background:#003049;
+
+    color:white;
+
+    border-radius:40px;
+
+    cursor:pointer;
+
+    font-size:15px;
+
+    font-weight:600;
+
+    transition:.3s;
+}
+
+.home-btn:hover{
+
+    background:#f77f00;
+
+    transform:translateY(-2px);
+
+    box-shadow:0 8px 20px rgba(247,127,0,.35);
+
+}
